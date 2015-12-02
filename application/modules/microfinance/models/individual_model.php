@@ -130,6 +130,7 @@ class Individual_model extends CI_Model
 			'civilstatus_id'=>$this->input->post('civil_status_id'),
 			'individual_address'=>$this->input->post('individual_address'),
 			'individual_locality'=>$this->input->post('individual_locality'),
+			'kra_pin'=>$this->input->post('kra_pin'),
 			'title_id'=>$this->input->post('title_id'),
 			'individual_number'=>$this->input->post('individual_number'),
 			'individual_city'=>$this->input->post('individual_city'),
@@ -168,6 +169,7 @@ class Individual_model extends CI_Model
 			'civilstatus_id'=>$this->input->post('civil_status_id'),
 			'individual_address'=>$this->input->post('individual_address'),
 			'individual_locality'=>$this->input->post('individual_locality'),
+			'kra_pin'=>$this->input->post('kra_pin'),
 			'title_id'=>$this->input->post('title_id'),
 			'individual_number'=>$this->input->post('individual_number'),
 			'individual_city'=>$this->input->post('individual_city'),
@@ -187,6 +189,65 @@ class Individual_model extends CI_Model
 		else{
 			return FALSE;
 		}
+	}
+
+
+	function upload_inividual_image($individual_id, $image)
+	{
+		$data = array(
+			'document_name'=> $image,
+			'created_by'=> $this->session->userdata('personnel_id'),
+			'modified_by'=> $this->session->userdata('personnel_id'),
+			'created'=> date('Y-m-d H:i:s'),
+			'individual_id'=>$individual_id
+		);
+		
+		if($this->db->insert('individual_identification', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+
+	function upload_individual_documents($individual_id, $document)
+	{
+		$data = array(
+			'document_name'=> $this->input->post('document_item_name'),
+			'document_upload_name'=> $document,
+			'created_by'=> $this->session->userdata('personnel_id'),
+			'modified_by'=> $this->session->userdata('personnel_id'),
+			'created'=> date('Y-m-d H:i:s'),
+			'individual_id'=>$individual_id
+		);
+		
+		if($this->db->insert('document_uploads', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+
+	function get_individual_identifications($individual_id)
+	{
+		$this->db->from('individual_identification');
+		$this->db->select('*');
+		$this->db->where('individual_id = '.$individual_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	function get_document_uploads($individual_id)
+	{
+		$this->db->from('document_uploads');
+		$this->db->select('*');
+		$this->db->where('individual_id = '.$individual_id);
+		$query = $this->db->get();
+		
+		return $query;
 	}
 	
 	/*
@@ -628,6 +689,7 @@ class Individual_model extends CI_Model
 			'individual_emergency_city'=>$this->input->post('individual_emergency_city'),
 			'individual_emergency_post_code'=>$this->input->post('individual_emergency_post_code'),
 			'individual_emergency_email2'=>$this->input->post('individual_emergency_email2'),
+			'share_percentage'=>$this->input->post('share_percentage'),
 			'document_id'=>$this->input->post('document_id'),
 			'document_number'=>$this->input->post('document_number'),
 			'relationship_id'=>$this->input->post('relationship_id'),
@@ -635,6 +697,39 @@ class Individual_model extends CI_Model
 		);
 		
 		if($this->db->insert('individual_emergency', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	/*
+	*	Add a new individual
+	*	@param string $image_name
+	*
+	*/
+	public function edit_emergency($individual_id,$individual_emergency_id)
+	{
+		$data = array(
+			'individual_emergency_onames'=>ucwords(strtolower($this->input->post('individual_emergency_onames'))),
+			'individual_emergency_fname'=>ucwords(strtolower($this->input->post('individual_emergency_fname'))),
+			'individual_emergency_dob'=>$this->input->post('individual_emergency_dob'),
+			'individual_emergency_email'=>$this->input->post('individual_emergency_email'),
+			'individual_emergency_phone'=>$this->input->post('individual_emergency_phone'),
+			'individual_emergency_phone2'=>$this->input->post('individual_emergency_phone2'),
+			'individual_emergency_address'=>$this->input->post('individual_emergency_address'),
+			'individual_emergency_city'=>$this->input->post('individual_emergency_city'),
+			'individual_emergency_post_code'=>$this->input->post('individual_emergency_post_code'),
+			'individual_emergency_email2'=>$this->input->post('individual_emergency_email2'),
+			'share_percentage'=>$this->input->post('share_percentage'),
+			'document_id'=>$this->input->post('document_id'),
+			'document_number'=>$this->input->post('document_number'),
+			'relationship_id'=>$this->input->post('relationship_id'),
+			'individual_id'=>$individual_id
+		);
+		$this->db->where('individual_emergency_id = '.$individual_emergency_id);
+		if($this->db->update('individual_emergency', $data))
 		{
 			return TRUE;
 		}

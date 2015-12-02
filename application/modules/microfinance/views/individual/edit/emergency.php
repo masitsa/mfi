@@ -29,6 +29,7 @@
 			$individual_emergency_onames = $row->individual_emergency_onames;
 			$individual_emergency_phone = $row->individual_emergency_phone;
 			$relationship_name = $row->relationship_name;
+            $share_percentage = $row->share_percentage;
 			$individual_emergency_status = $row->individual_emergency_status;
 			$created = date('jS M Y H:i a',strtotime($row->created));
 			$last_modified = date('jS M Y H:i a',strtotime($row->last_modified));
@@ -234,6 +235,13 @@ else
             
             <div class="col-lg-7">
             	<input type="text" class="form-control" name="individual_emergency_address" placeholder="Address" value="<?php echo $individual_emergency_address;?>">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-5 control-label">Appointment to beneficiaries (%): </label>
+            
+            <div class="col-lg-7">
+                <input type="text" class="form-control" name="share_percentage" placeholder="Appointment to beneficiaries in (%)" value="<?php echo $individual_emergency_address;?>">
             </div>
         </div>
     </div>
