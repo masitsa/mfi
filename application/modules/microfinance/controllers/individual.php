@@ -205,6 +205,7 @@ class Individual extends microfinance
 		$v_data['image_location'] = $image_location;
 		$v_data['signature_location'] = $signature_location;
 		$v_data['individual_id'] = $individual_id;
+		$v_data['personnel'] = $this->personnel_model->retrieve_personnel();
 		$v_data['relationships'] = $this->individual_model->get_relationship();
 		$v_data['religions'] = $this->individual_model->get_religion();
 		$v_data['civil_statuses'] = $this->individual_model->get_civil_status();
@@ -215,7 +216,9 @@ class Individual extends microfinance
 		$v_data['dependants'] = $this->individual_model->get_individual_dependants($individual_id);
 		$v_data['jobs'] = $this->individual_model->get_individual_jobs($individual_id);
 		$v_data['individual_savings'] = $this->individual_model->get_individual_savings_plans($individual_id);
+		$v_data['individual_loan'] = $this->individual_model->get_individual_loans($individual_id);
 		$v_data['savings_plans'] = $this->savings_plan_model->all_savings_plan();
+		$v_data['loans_plans'] = $this->loans_plan_model->all_loans_plan();
 		$v_data['parent_sections'] = $this->sections_model->all_parent_sections('section_position');
 		$data['content'] = $this->load->view('individual/edit_individual', $v_data, true);
 		
@@ -600,6 +603,139 @@ class Individual extends microfinance
 			$this->session->set_userdata('error_message', 'Next of kin could not deleted');
 		}
 		redirect('microfinance/edit-individual/'.$individual_id);
+	}
+	
+	public function loan_application($individual_id)
+	{
+		//form validation rules
+		$this->form_validation->set_rules('loans_plan_id', 'Loan plan', 'required|xss_clean');
+		$this->form_validation->set_rules('proposed_amount', 'Requested amount', 'numeric|required|xss_clean');
+		$this->form_validation->set_rules('purpose', 'Purpose', 'required|xss_clean');
+		$this->form_validation->set_rules('no_of_repayments', 'Start date', 'numeric|required|xss_clean');
+		$this->form_validation->set_rules('grace_period', 'Opening balance', 'numeric|required|xss_clean');
+		$this->form_validation->set_rules('application_date', 'Application date', 'required|xss_clean');
+		
+		//if form conatins invalid data
+		if ($this->form_validation->run())
+		{
+			if($this->individual_model->loan_application($individual_id))
+			{
+				$this->session->set_userdata("success_message", "Loan application successfully");
+				redirect('microfinance/edit-individual/'.$individual_id);
+			}
+			
+			else
+			{
+				$this->session->set_userdata("error_message", "Could not apply for loan. Please try again");
+			}
+		}
+		
+		$this->edit_individual($individual_id);
+	}
+	
+	public function add_guarantors($individual_loan_id, $individual_id)
+	{
+		//form validation rules
+		$this->form_validation->set_rules('individual_id', 'Guarantor', 'required|xss_clean');
+		$this->form_validation->set_rules('guaranteed_amount', 'Guaranteed amount', 'numeric|required|xss_clean');
+		
+		//if form conatins invalid data
+		if ($this->form_validation->run())
+		{
+			if($this->individual_model->add_guarantors($individual_loan_id))
+			{
+				$this->session->set_userdata("success_message", "Guarantor added successfully");
+				redirect('microfinance/add-guarantors/'.$individual_loan_id.'/'.$individual_id);
+			}
+			
+			else
+			{
+				$this->session->set_userdata("error_message", "Could not add guarantor. Please try again");
+			}
+		}
+		
+		$v_data['guarantors'] = $this->individual_model->get_guarantors($individual_loan_id);
+		$v_data['source_individual_id'] = $individual_id;
+		$v_data['individual_loan_id'] = $individual_loan_id;
+		$v_data['individuals'] = $this->individual_model->all_individual($individual_id);
+		$data['title'] = 'Add guarantor';
+		$v_data['title'] = $data['title'];
+		$data['content'] = $this->load->view('individual/add_guarantor', $v_data, true);
+		
+		$this->load->view('admin/templates/general_page', $data);
+	}
+	
+	public function delete_loan_guarantor($individual_loan_id, $individual_id, $loan_guarantor_id)
+	{
+		if($this->individual_model->delete_loan_guarantor($loan_guarantor_id))
+		{
+			$this->session->set_userdata('success_message', 'Guarantor has been deleted');
+		}
+		
+		else
+		{
+			$this->session->set_userdata('error_message', 'Individual could not guarantor');
+		}
+		redirect('microfinance/add-guarantors/'.$individual_loan_id.'/'.$individual_id);
+	}
+	
+	public function get_guarantors($individual_loan_id, $individual_id)
+	{
+		$v_data['guarantors'] = $this->individual_model->get_guarantors($individual_loan_id);
+		$v_data['source_individual_id'] = $individual_id;
+		$v_data['individual_loan_id'] = $individual_loan_id;
+		$v_data['individuals'] = $this->individual_model->all_individual($individual_id);
+		$data['title'] = 'Add guarantor';
+		$v_data['title'] = $data['title'];
+		echo $this->load->view('individual/get_guarantors', $v_data, true);
+	}
+	
+	public function add_loan_payment($individual_loan_id, $individual_id)
+	{
+		//form validation rules
+		$this->form_validation->set_rules('payment_amount', 'Payment_amount', 'required|xss_clean');
+		$this->form_validation->set_rules('payment_date', 'Payment date', 'required|xss_clean');
+		$this->form_validation->set_rules('payment_interest', 'Payment interest', 'required|xss_clean');
+		
+		//if form conatins invalid data
+		if ($this->form_validation->run())
+		{
+			if($this->individual_model->add_loan_payment($individual_loan_id))
+			{
+				$this->session->set_userdata("success_message", "Payment added successfully");
+				redirect('microfinance/add-loan-payment/'.$individual_loan_id.'/'.$individual_id);
+			}
+			
+			else
+			{
+				$this->session->set_userdata("error_message", "Could not add payment. Please try again");
+			}
+		}
+		
+		$v_data['loan_details'] = $this->individual_model->get_individual_loan($individual_loan_id);
+		$v_data['payments'] = $this->individual_model->get_loan_payments($individual_loan_id);
+		$v_data['source_individual_id'] = $individual_id;
+		$v_data['individual_loan_id'] = $individual_loan_id;
+		//$v_data['individuals'] = $this->individual_model->all_individual($individual_id);
+		$data['title'] = 'Add loan payment';
+		$v_data['title'] = $data['title'];
+		$data['content'] = $this->load->view('individual/add_loan_payment', $v_data, true);
+		
+		$this->load->view('admin/templates/general_page', $data);
+	}
+	
+	public function delete_loan_payment($individual_loan_id, $individual_id, $loan_payment_id)
+	{
+		if($this->individual_model->delete_loan_payment($loan_payment_id))
+		{
+			$this->session->set_userdata('success_message', 'Payment has been deleted');
+		}
+		
+		else
+		{
+			$this->session->set_userdata('error_message', 'Individual could not payment');
+		}
+		redirect('microfinance/add-loan-payment/'.$individual_loan_id.'/'.$individual_id);
 	}
 }
 ?>

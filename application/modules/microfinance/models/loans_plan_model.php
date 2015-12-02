@@ -28,6 +28,7 @@ class Loans_plan_model extends CI_Model
 	public function all_loans_plan()
 	{
 		$this->db->where('loans_plan_status = 1');
+		$this->db->order_by('loans_plan_name');
 		$query = $this->db->get('loans_plan');
 		
 		return $query;
@@ -49,14 +50,15 @@ class Loans_plan_model extends CI_Model
 	*/
 	public function get_interest_scheme()
 	{
-		$query = $this->db->get('loans_plan_interest_scheme');
-		// print_r($query);
+		$this->db->order_by('interest_name');
+		$query = $this->db->get('interest');
 		return $query;
 	}
 	
 	public function get_installment_types()
 	{
-		$query = $this->db->get('loan_plan_installment_type');
+		$this->db->order_by('installment_type_name');
+		$query = $this->db->get('installment_type');
 		return $query;
 	}
 	/*
@@ -94,7 +96,7 @@ class Loans_plan_model extends CI_Model
 	{
 		//retrieve all users
 		$this->db->from($table);
-		$this->db->select('loans_plan.*');
+		$this->db->select('loans_plan.*, installment_type.installment_type_name, interest.interest_name');
 		$this->db->where($where);
 		$this->db->order_by($order, $order_method);
 		$query = $this->db->get('', $per_page, $page);
@@ -110,65 +112,32 @@ class Loans_plan_model extends CI_Model
 	public function add_loans_plan()
 	{
 		$data = array(
-			'loans_plan_name'                           =>$this->input->post('loans_plan_name'),
-			'loans_plan_installment_type'               =>$this->input->post('installment_type'),
-			'loans_plan_grace_period_min'               =>$this->input->post('grace_period_minimum'),
-			'loans_plan_grace_period_max'               =>$this->input->post('grace_period_maximum'),
-			'loans_plan_grace_period_default'           =>$this->input->post('grace_period_default'),
-			'loans_plan_grace_period_interest'          =>$this->input->post('charge_interest_over_grace_period'),
-			'loans_plan_interest_scheme'                =>$this->input->post('interest_scheme'),
-			'loans_plan_funding_line'                   =>$this->input->post('funding_line'),
-			'loans_plan_min_amount'                     =>$this->input->post('minimum_loan_amount'),
-			'loans_plan_max_amount'                     =>$this->input->post('maximum_loan_amount'),
-			'loans_plan_custom_amount'                  =>$this->input->post('custom_loan_amount'),
-			'loans_plan_annual_min_interest'            =>$this->input->post('annual_minimum_interest'),
-			'loans_plan_annual_max_interest'            =>$this->input->post('annual_maximum_interest'),
-			'loans_plan_annual_custom_interest'         =>$this->input->post('annual_custom_interest'),
-			'loans_plan_min_installments'               =>$this->input->post('minimum_number_of_installments'),
-			'loans_plan_max_installments'               =>$this->input->post('maximum_number_of_installments'),
-			'loans_plan_custom_installments'            =>$this->input->post('custom_number_of_installments'),
-			// 'loans_plan_entry_fees_id'               =>$this->session->userdata('personnel_id'),
-			'loans_plan_late_fee_on_total_min'          =>$this->input->post('minimum_late_fee_on_total_loan'),
-			'loans_plan_late_fee_on_total_max'          =>$this->input->post('maximum_late_fee_on_total_loan'),
-			'loans_plan_late_fee_on_total_custom_value' =>$this->input->post('custom_late_fee_on_total_loan'),
-			'loans_plan_lfoop_min'                      =>$this->input->post('minimum_late_fee_on_overdue_principal'),
-			'loans_plan_lfoop_max'                      =>$this->input->post('maximum_late_fee_on_overdue_principal'),
-			'loans_plan_lfoop_custom_value'             =>$this->input->post('custom_late_fee_on_overdue_principal'),
-			'loans_plan_lfoolb_min'                     =>$this->input->post('minimum_late_fee_on_olb'),
-			'loans_plan_lfoolb_max'                     =>$this->input->post('maximum_late_fee_on_olb'),
-			'loans_plan_lfoolb_custom_value'            =>$this->input->post('custom_late_fee_on_olb'),
-			'loans_plan_lfooverdue_min'                 =>$this->input->post('minimum_late_fee_on_overdue_interest'),
-			'loans_plan_lfooverdue_max'                 =>$this->input->post('maximum_late_fee_on_overdue_interest'),
-			'loans_plan_lfooverdue_custom_value'        =>$this->input->post('custom_late_fee_on_overdue_interest'),
-			'atr_fees_min'                              =>$this->input->post('atr_minimum_fees'),
-			'atr_fees_max'                              =>$this->input->post('atr_maximum_fees'),
-			'atr_fees_custom_value'                     =>$this->input->post('atr_custom_fees'),
-			'apr_fees_min'                              =>$this->input->post('apr_minimum_fees'),
-			'apr_fees_max'                              =>$this->input->post('apr_maximum_fees'),
-			'apr_fees_custom_value'                     =>$this->input->post('apr_custom_fees'),
-			'use_line_of_credit'                        =>$this->input->post('use_line_of_credit'),
-			'max_number_of_tranches'                    =>$this->input->post('maximum_number_of_tranches'),
-			'min_number_of_tranches'                    =>$this->input->post('minimum_number_of_tranches'),
-			'custom_number_of_tranches'                 =>$this->input->post('custom_number_of_tranches'),
-			'total_amout_of_loc_min'                    =>$this->input->post('minimum_line_of_credit_amount'),
-			'total_amout_of_loc_max'                    =>$this->input->post('maximum_line_of_credit_amount'),
-			'total_amout_of_loc_custom_value'           =>$this->input->post('custom_line_of_credit_amount'),
-			'number_of_installments_min'                =>$this->input->post('minimum_number_of_installments'),
-			'number_of_installments_max'                =>$this->input->post('maximum_number_of_installments'),
-			'number_of_installments_custom_value'       =>$this->input->post('custom_number_of_installments'),
-			// 'credit_insurance_min'                   =>$this->session->userdata('personnel_id'),
-			// 'credit_insurance_max'                   =>$this->session->userdata('personnel_id'),
-			// 'credit_insurance_custom_value'          =>$this->session->userdata('personnel_id'),
-			'use_gc'                                    =>$this->input->post('use_gc'),
-			'min_gc'                                    =>$this->input->post('min_gc'),
-			'set_separate_gc'                           =>$this->input->post('set_separate_gc'),
-			'min_guarantors'                            =>$this->input->post('min_guarantors'),
-			'min_collaterals'                           =>$this->input->post('min_collateral'),
-			'use_compulsory_savings'                    =>$this->input->post('use_compulsory_savings'),
-			'compulsory_savings_min'                    =>$this->input->post('compulsory_savings_minimum'),
-			'compulsory_savings_max'                    =>$this->input->post('compulsory_savings_maximum'),
-			'compulsory_savings_custom_value'           =>$this->input->post('compulsory_savings_custom'),
-
+			'interest_rate'                         =>$this->input->post('interest_rate'),
+			'interest_id'                           =>$this->input->post('interest_id'),
+			'loans_plan_name'               		=>$this->input->post('loans_plan_name'),
+			'installment_type_id'               	=>$this->input->post('installment_type_id'),
+			'grace_period_minimum'               	=>$this->input->post('grace_period_minimum'),
+			'grace_period_maximum'           		=>$this->input->post('grace_period_maximum'),
+			'grace_period_default'          		=>$this->input->post('grace_period_default'),
+			'charge_interest_over_grace_period'		=>$this->input->post('charge_interest_over_grace_period'),
+			'maximum_loan_amount'                   =>$this->input->post('maximum_loan_amount'),
+			'minimum_loan_amount'					=>$this->input->post('minimum_loan_amount'),
+			'custom_loan_amount'					=>$this->input->post('custom_loan_amount'),
+			'maximum_number_of_installments'		=>$this->input->post('maximum_number_of_installments'),
+			'minimum_number_of_installments'		=>$this->input->post('minimum_number_of_installments'),
+			'custom_number_of_installments'			=>$this->input->post('custom_number_of_installments'),
+			'minimum_late_fee_on_total_loan'		=>$this->input->post('minimum_late_fee_on_total_loan'),
+			'maximum_late_fee_on_total_loan'		=>$this->input->post('maximum_late_fee_on_total_loan'),
+			'custom_late_fee_on_total_loan'			=>$this->input->post('custom_late_fee_on_total_loan'),
+			'minimum_late_fee_on_overdue_principal'	=>$this->input->post('minimum_late_fee_on_overdue_principal'),
+			'maximum_late_fee_on_overdue_principal'	=>$this->input->post('maximum_late_fee_on_overdue_principal'),
+			'custom_late_fee_on_overdue_principal'	=>$this->input->post('custom_late_fee_on_overdue_principal'),
+			'minimum_late_fee_on_overdue_interest'	=>$this->input->post('minimum_late_fee_on_overdue_interest'),
+			'maximum_late_fee_on_overdue_interest'	=>$this->input->post('maximum_late_fee_on_overdue_interest'),
+			'custom_late_fee_on_overdue_interest'	=>$this->input->post('custom_late_fee_on_overdue_interest'),
+			'maximum_number_of_guarantors'			=>$this->input->post('maximum_number_of_guarantors'),
+			'minimum_number_of_guarantors'			=>$this->input->post('minimum_number_of_guarantors'),
+			'custom_number_of_guarantors'			=>$this->input->post('custom_number_of_guarantors')
 		);
 		
 		if($this->db->insert('loans_plan', $data))
@@ -189,12 +158,32 @@ class Loans_plan_model extends CI_Model
 	public function edit_loans_plan($loans_plan_id)
 	{
 		$data = array(
-			'loans_plan_name'=>$this->input->post('loans_plan_name'),
-			'loans_plan_min_opening_balance'=>$this->input->post('loans_plan_min_opening_balance'),
-			'loans_plan_min_account_balance'=>$this->input->post('loans_plan_min_account_balance'),
-			'charge_withdrawal'=>$this->input->post('charge_withdrawal'),
-			'compounding_period_id'=>$this->input->post('compounding_period_id'),
-			'modified_by'=>$this->session->userdata('personnel_id')
+			'interest_rate'                         =>$this->input->post('interest_rate'),
+			'interest_id'                           =>$this->input->post('interest_id'),
+			'loans_plan_name'               		=>$this->input->post('loans_plan_name'),
+			'installment_type_id'               	=>$this->input->post('installment_type_id'),
+			'grace_period_minimum'               	=>$this->input->post('grace_period_minimum'),
+			'grace_period_maximum'           		=>$this->input->post('grace_period_maximum'),
+			'grace_period_default'          		=>$this->input->post('grace_period_default'),
+			'charge_interest_over_grace_period'		=>$this->input->post('charge_interest_over_grace_period'),
+			'maximum_loan_amount'                   =>$this->input->post('maximum_loan_amount'),
+			'minimum_loan_amount'					=>$this->input->post('minimum_loan_amount'),
+			'custom_loan_amount'					=>$this->input->post('custom_loan_amount'),
+			'maximum_number_of_installments'		=>$this->input->post('maximum_number_of_installments'),
+			'minimum_number_of_installments'		=>$this->input->post('minimum_number_of_installments'),
+			'custom_number_of_installments'			=>$this->input->post('custom_number_of_installments'),
+			'minimum_late_fee_on_total_loan'		=>$this->input->post('minimum_late_fee_on_total_loan'),
+			'maximum_late_fee_on_total_loan'		=>$this->input->post('maximum_late_fee_on_total_loan'),
+			'custom_late_fee_on_total_loan'			=>$this->input->post('custom_late_fee_on_total_loan'),
+			'minimum_late_fee_on_overdue_principal'	=>$this->input->post('minimum_late_fee_on_overdue_principal'),
+			'maximum_late_fee_on_overdue_principal'	=>$this->input->post('maximum_late_fee_on_overdue_principal'),
+			'custom_late_fee_on_overdue_principal'	=>$this->input->post('custom_late_fee_on_overdue_principal'),
+			'minimum_late_fee_on_overdue_interest'	=>$this->input->post('minimum_late_fee_on_overdue_interest'),
+			'maximum_late_fee_on_overdue_interest'	=>$this->input->post('maximum_late_fee_on_overdue_interest'),
+			'custom_late_fee_on_overdue_interest'	=>$this->input->post('custom_late_fee_on_overdue_interest'),
+			'maximum_number_of_guarantors'			=>$this->input->post('maximum_number_of_guarantors'),
+			'minimum_number_of_guarantors'			=>$this->input->post('minimum_number_of_guarantors'),
+			'custom_number_of_guarantors'			=>$this->input->post('custom_number_of_guarantors')
 		);
 		
 		$this->db->where('loans_plan_id', $loans_plan_id);
@@ -233,6 +222,8 @@ class Loans_plan_model extends CI_Model
 		//retrieve all users
 		$this->db->from('loans_plan');
 		$this->db->select('*');
+		$this->db->join('interest', 'interest.interest_id = loans_plan.interest_id', 'left');
+		$this->db->join('installment_type', 'installment_type.installment_type_id = loans_plan.installment_type_id', 'left');
 		$this->db->where('loans_plan_id = '.$loans_plan_id);
 		$query = $this->db->get();
 		

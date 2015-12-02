@@ -108,6 +108,8 @@
         <script src="<?php echo base_url()."assets/bluish/"?>js/jquery.flot.axislabels.js"></script>
         <script src="<?php echo base_url()."assets/bluish/"?>js/jquery.flot.pie.js"></script>
         <script src="<?php echo base_url()."assets/bluish/"?>js/jquery.flot.stack.js"></script>
+		<script src='<?php echo base_url()."assets/themes/"?>customselect/jquery-customselect.js'></script>
+	    <link href='<?php echo base_url()."assets/themes/"?>customselect/jquery-customselect.css' rel='stylesheet' />
         <script src="<?php echo base_url()."assets/"?>js/main.js"></script>
 		
 	</body>

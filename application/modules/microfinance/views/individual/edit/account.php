@@ -10,11 +10,11 @@
 			<thead>
 				<tr>
 					<th>#</th>
-					<th>Plan</a></th>
-					<th>Opening balance</a></th>
-					<th>Start date</a></th>
-					<th>Last editted</a></th>
-					<th>Status</a></th>
+					<th>Plan</th>
+					<th>Opening balance</th>
+					<th>Start date</th>
+					<th>Last editted</th>
+					<th>Status</th>
 					<th colspan="5">Actions</th>
 				</tr>
 			</thead>

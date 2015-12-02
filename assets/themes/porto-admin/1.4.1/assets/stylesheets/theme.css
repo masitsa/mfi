@@ -17593,3 +17593,6 @@ a:hover{text-decoration:none;}
 .modal-dialog{
 	width: 800px;
 }
+.modal-dialog-wide{
+	width: 90% !important;
+}

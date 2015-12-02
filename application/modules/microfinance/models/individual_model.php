@@ -60,9 +60,16 @@ class Individual_model extends CI_Model
 	*	Retrieve all individual
 	*
 	*/
-	public function all_individual()
+	public function all_individual($individual_id = NULL)
 	{
-		$this->db->where('individual_status = 0');
+		$where = 'individual_status = 0';
+		
+		if($individual_id != NULL)
+		{
+			$where .= ' AND individual.individual_id <> '.$individual_id;
+		}
+		$this->db->where($where);
+		$this->db->order_by('individual_fname');
 		$query = $this->db->get('individual');
 		
 		// var_dump($query);
@@ -658,6 +665,303 @@ class Individual_model extends CI_Model
 		else{
 			return FALSE;
 		}
+	}
+	
+	public function get_individual_loans($individual_id)
+	{
+		$this->db->from('individual_loan');
+		$this->db->select('individual_loan.*, loans_plan.loans_plan_name');
+		$this->db->join('loans_plan', 'loans_plan.loans_plan_id = individual_loan.loans_plan_id', 'left');
+		$this->db->order_by('created', 'DESC');
+		$this->db->where('individual_loan.individual_id = '.$individual_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	
+	/*
+	*	Add a new individual
+	*	@param string $image_name
+	*
+	*/
+	public function add_individual_loan($individual_id) 
+	{
+		$loans_plan_id = $this->input->post('loans_plan_id');
+		
+		//get loan details
+		$this->db->select('loans_plan.interest_id, loans_plan.interest_rate, installment_type.installment_type_duration');
+		$this->db->where('loans_plan_id', $loans_plan_id);
+		$this->db->join('installment_type', 'installment_type.installment_type_id = loans_plan.loans_plan_id', 'left');
+		$query = $this->db->get('loans_plan');
+		
+		if($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$interest_id = $row->interest_id;
+			$interest_rate = $row->interest_rate;
+			$installment_type_duration = $row->installment_type_duration;
+		}
+		
+		else
+		{
+			$interest_id = 0;
+			$installment_type_duration = 0;
+			$interest_rate = 0;
+		}
+		
+		$data = array(
+			'interest_rate'=>$interest_rate,
+			'individual_id'=>$individual_id,
+			'loans_plan_id'=>$loans_plan_id,
+			'interest_rate'=>$interest_rate,
+			'interest_id'=>$interest_id,
+			'installment_type_duration'=>$installment_type_duration,
+			'individual_loan_status'=>$this->input->post('individual_loan_status'),
+			'individual_loan_opening_balance'=>$this->input->post('individual_loan_opening_balance'),
+			'start_date'=>$this->input->post('start_date'),
+			'created'=>date('Y-m-d H:i:s'),
+			'created_by'=>$this->session->userdata('personnel_id'),
+			'modified_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		if($this->db->insert('individual_loan', $data))
+		{
+			return $this->db->insert_id();
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	/*
+	*	Activate a individual plan
+	*	@param int $individual_loan_id
+	*
+	*/
+	public function activate_individual_loan($individual_loan_id)
+	{
+		$data = array(
+				'individual_loan_status' => 1
+			);
+		$this->db->where('individual_loan_id', $individual_loan_id);
+		
+
+		if($this->db->update('individual_loan', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	/*
+	*	Deactivate a individual plan
+	*	@param int $individual_loan_id
+	*
+	*/
+	public function deactivate_individual_loan($individual_loan_id)
+	{
+		$data = array(
+				'individual_loan_status' => 0
+			);
+		$this->db->where('individual_loan_id', $individual_loan_id);
+		
+
+		if($this->db->update('individual_loan', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	/*
+	*	Add a new individual
+	*	@param string $image_name
+	*
+	*/
+	public function loan_application($individual_id) 
+	{
+		$loans_plan_id = $this->input->post('loans_plan_id');
+		
+		//get loan details
+		$this->db->select('loans_plan.interest_id, loans_plan.interest_rate, installment_type.installment_type_duration');
+		$this->db->where('loans_plan_id', $loans_plan_id);
+		$this->db->join('installment_type', 'installment_type.installment_type_id = loans_plan.loans_plan_id', 'left');
+		$query = $this->db->get('loans_plan');
+		
+		if($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$interest_id = $row->interest_id;
+			$interest_rate = $row->interest_rate;
+			$installment_type_duration = $row->installment_type_duration;
+		}
+		
+		else
+		{
+			$interest_id = 0;
+			$installment_type_duration = 0;
+			$interest_rate = 0;
+		}
+		
+		$data = array(
+			'interest_rate'=>$interest_rate,
+			'individual_id'=>$individual_id,
+			'loans_plan_id'=>$loans_plan_id,
+			'interest_rate'=>$interest_rate,
+			'interest_id'=>$interest_id,
+			'installment_type_duration'=>$installment_type_duration,
+			'proposed_amount'=>$this->input->post('proposed_amount'),
+			'no_of_repayments'=>$this->input->post('no_of_repayments'),
+			'grace_period'=>$this->input->post('grace_period'),
+			'purpose'=>$this->input->post('purpose'),
+			'application_date'=>$this->input->post('application_date'),
+			'created'=>date('Y-m-d H:i:s'),
+			'created_by'=>$this->session->userdata('personnel_id'),
+			'modified_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		if($this->db->insert('individual_loan', $data))
+		{
+			return $this->db->insert_id();
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	public function get_guarantors($individual_loan_id)
+	{
+		$this->db->from('individual, loan_guarantor');
+		$this->db->select('individual.individual_fname, individual.individual_onames, loan_guarantor.loan_guarantor_id, loan_guarantor.created_by, loan_guarantor.created, loan_guarantor.guaranteed_amount, personnel.personnel_fname, personnel.personnel_onames');
+		$this->db->order_by('individual_fname', 'DESC');
+		$this->db->join('personnel', 'personnel.personnel_id = loan_guarantor.created_by', 'left');
+		$this->db->where('loan_guarantor.loan_guarantor_delete <> 1 AND individual.individual_id = loan_guarantor.individual_id AND loan_guarantor.individual_loan_id = '.$individual_loan_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	
+	/*
+	*	Add a new individual
+	*	@param string $image_name
+	*
+	*/
+	public function add_guarantors($individual_loan_id) 
+	{
+		$data = array(
+			'individual_loan_id'=>$individual_loan_id,
+			'individual_id'=>$this->input->post('individual_id'),
+			'guaranteed_amount'=>$this->input->post('guaranteed_amount'),
+			'created'=>date('Y-m-d H:i:s'),
+			'created_by'=>$this->session->userdata('personnel_id'),
+			'modified_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		if($this->db->insert('loan_guarantor', $data))
+		{
+			return $this->db->insert_id();
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	public function delete_loan_guarantor($loan_guarantor_id)
+	{
+		$data = array(
+			'loan_guarantor_delete'=>1,
+			'deleted_on'=>date('Y-m-d H:i:s'),
+			'deleted_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		$this->db->where('loan_guarantor_id', $loan_guarantor_id);
+		if($this->db->update('loan_guarantor', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	public function get_loan_details($individual_loan_id)
+	{
+		$where = 'individual_loan.individual_loan_id = '.$individual_loan_id;
+		$this->db->select('loans_plan.*');
+		$this->db->where($where);
+		$query = $this->db->get('loans_plan, individual_loan');
+		
+		// var_dump($query);
+		return $query;
+	}
+	
+	public function get_loan_payments($individual_loan_id)
+	{
+		$this->db->from('loan_payment');
+		$this->db->select('loan_payment.*, personnel.personnel_fname, personnel.personnel_onames');
+		$this->db->order_by('loan_payment.payment_date', 'ASC');
+		$this->db->join('personnel', 'personnel.personnel_id = loan_payment.created_by', 'left');
+		$this->db->where('loan_payment.loan_payment_delete <> 1 AND loan_payment.individual_loan_id = '.$individual_loan_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	
+	/*
+	*	Add a new individual
+	*	@param string $image_name
+	*
+	*/
+	public function add_loan_payment($individual_loan_id) 
+	{
+		$data = array(
+			'individual_loan_id'=>$individual_loan_id,
+			'payment_amount'=>$this->input->post('payment_amount'),
+			'payment_interest'=>$this->input->post('payment_interest'),
+			'payment_date'=>$this->input->post('payment_date'),
+			'created'=>date('Y-m-d H:i:s'),
+			'created_by'=>$this->session->userdata('personnel_id'),
+			'modified_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		if($this->db->insert('loan_payment', $data))
+		{
+			return $this->db->insert_id();
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	public function delete_loan_payment($loan_payment_id)
+	{
+		$data = array(
+			'loan_payment_delete'=>1,
+			'deleted_on'=>date('Y-m-d H:i:s'),
+			'deleted_by'=>$this->session->userdata('personnel_id')
+		);
+		
+		$this->db->where('loan_payment_id', $loan_payment_id);
+		if($this->db->update('loan_payment', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	public function get_individual_loan($individual_loan_id)
+	{
+		$this->db->from('individual_loan');
+		$this->db->where('individual_loan.individual_loan_id = '.$individual_loan_id);
+		$query = $this->db->get();
+		
+		return $query;
 	}
 }
 ?>

@@ -62,6 +62,9 @@ $individual_phone = $row->individual_phone;
 										<a class="text-center" data-toggle="tab" href="#account"><i class="fa fa-money"></i> Savings</a>
 									</li>
 									<li>
+										<a class="text-center" data-toggle="tab" href="#loans"><i class="fa fa-balance-scale"></i> Loans</a>
+									</li>
+									<li>
 										<a class="text-center" data-toggle="tab" href="#emergency">Next of kin</a>
 									</li>
 									<li>
@@ -77,6 +80,9 @@ $individual_phone = $row->individual_phone;
 									</div>
 									<div class="tab-pane" id="account">
 										<?php echo $this->load->view('edit/account', '', TRUE);?>
+									</div>
+									<div class="tab-pane" id="loans">
+										<?php echo $this->load->view('edit/loans', '', TRUE);?>
 									</div>
 									<div class="tab-pane" id="emergency">
 										<?php echo $this->load->view('edit/emergency', '', TRUE);?>

@@ -372,6 +372,17 @@ $route['microfinance/deactivate-individual-plan/(:num)/(:num)'] = 'microfinance/
 $route['microfinance/loans'] = 'microfinance/loans_plan/index';
 $route['microfinance/add-loans-plan'] = 'microfinance/loans_plan/add_loans_plan';
 $route['microfinance/edit-loans-plan/(:num)'] = 'microfinance/loans_plan/edit_loans_plan/$1';
+$route['microfinance/activate-loans-plan/(:num)'] = 'microfinance/loans_plan/activate_loans_plan/$1';
+$route['microfinance/activate-loans-plan/(:num)/(:num)'] = 'microfinance/loans_plan/activate_loans_plan/$1/$2';
+$route['microfinance/deactivate-loans-plan/(:num)'] = 'microfinance/loans_plan/deactivate_loans_plan/$1';
+$route['microfinance/deactivate-loans-plan/(:num)/(:num)'] = 'microfinance/loans_plan/deactivate_loans_plan/$1/$2';
+$route['microfinance/loan-application/(:num)'] = 'microfinance/individual/loan_application/$1';
+$route['microfinance/add-guarantors/(:num)/(:num)'] = 'microfinance/individual/add_guarantors/$1/$2';
+$route['microfinance/delete-guarantor/(:num)/(:num)/(:num)'] = 'microfinance/individual/delete_loan_guarantor/$1/$2/$3';
+$route['microfinance/get-guarantors/(:num)/(:num)'] = 'microfinance/individual/get_guarantors/$1/$2';
+$route['microfinance/add-loan-payment/(:num)/(:num)'] = 'microfinance/individual/add_loan_payment/$1/$2';
+$route['microfinance/delete-loan-payment/(:num)/(:num)/(:num)'] = 'microfinance/individual/delete_loan_payment/$1/$2/$3';
+$route['microfinance/get-loan-payments/(:num)/(:num)'] = 'microfinance/individual/get_loan_payments/$1/$2';
 
 /**
  * Individual Payments
