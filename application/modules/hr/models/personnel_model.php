@@ -9,6 +9,7 @@ class Personnel_model extends CI_Model
 	public function retrieve_personnel()
 	{
 		$this->db->where('personnel_status = 1');
+		$this->db->order_by('personnel_fname');
 		$query = $this->db->get('personnel');
 		
 		return $query;
@@ -100,7 +101,8 @@ class Personnel_model extends CI_Model
 			'title_id'=>$this->input->post('title_id'),
 			'personnel_number'=>$this->input->post('personnel_number'),
 			'personnel_city'=>$this->input->post('personnel_city'),
-			'personnel_post_code'=>$this->input->post('personnel_post_code')
+			'personnel_post_code'=>$this->input->post('personnel_post_code'),
+			'personnel_type_id'=>$this->input->post('personnel_type_id')
 		);
 		
 		if($this->db->insert('personnel', $data))
@@ -111,8 +113,6 @@ class Personnel_model extends CI_Model
 			return FALSE;
 		}
 	}
-
-
 	
 	/*
 	*	Update an existing personnel
@@ -134,9 +134,15 @@ class Personnel_model extends CI_Model
 			'personnel_address'=>$this->input->post('personnel_address'),
 			'personnel_locality'=>$this->input->post('personnel_locality'),
 			'title_id'=>$this->input->post('title_id'),
-			'personnel_number'=>$this->input->post('personnel_number'),
-			'personnel_city'=>$this->input->post('personnel_city'),
-			'personnel_post_code'=>$this->input->post('personnel_post_code')
+			'personnel_number' => $this->input->post('personnel_number'),
+			'personnel_city' => $this->input->post('personnel_city'),
+			'personnel_post_code' => $this->input->post('personnel_post_code'),
+			'personnel_account_number' => $this->input->post('personnel_account_number'),
+			'personnel_nssf_number' => $this->input->post('personnel_nssf_number'),
+			'personnel_kra_pin' => $this->input->post('personnel_kra_pin'),
+			'personnel_nhif_number' => $this->input->post('personnel_nhif_number'),
+			'personnel_national_id_number' => $this->input->post('personnel_national_id_number'),
+			'personnel_type_id'=>$this->input->post('personnel_type_id')
 		);
 		
 		$this->db->where('personnel_id', $personnel_id);
@@ -901,6 +907,65 @@ class Personnel_model extends CI_Model
 		else{
 			return FALSE;
 		}
+	}
+	/*
+	*	Activate a deactivated personnel
+	*	@param int $personnel_id
+	*
+	*/
+	public function edit_supervisor_authorize($personnel_id)
+	{
+		$data = array(
+				'authorize_supervisor_changes' => $this->input->post('authorize_supervisor_changes')
+			);
+		$this->db->where('personnel_id', $personnel_id);
+		
+
+		if($this->db->update('personnel', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+
+	/*
+	*	Activate a deactivated personnel
+	*	@param int $personnel_id
+	*
+	*/
+	public function edit_store_authorize($personnel_id)
+	{
+		$data = array(
+				'store_id' => $this->input->post('store_id'),
+				'personnel_id' => $personnel_id,
+				'created'=>date("Y-m-d H:i:s"),
+				'created_by'=>$this->session->userdata('personnel_id'),
+				'modified_by'=>$this->session->userdata('personnel_id')
+			);
+		
+
+		if($this->db->insert('personnel_store', $data))
+		{
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
+	}
+	
+	/*
+	*	Select get personnel types
+	*
+	*/
+	public function get_personnel_types()
+	{
+		$this->db->select('*');
+		$this->db->order_by('personnel_type_name', 'ASC');
+		$query = $this->db->get('personnel_type');
+		
+		return $query;
 	}
 }
 ?>

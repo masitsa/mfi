@@ -20,6 +20,7 @@ $document_id = $row->document_id;
 $document_number = $row->document_number;
 $document_place = $row->document_place;
 $individual_email2 = $row->individual_email2;
+$kra_pin = $row->kra_pin;
 
 //repopulate data if validation errors occur
 $validation_error = validation_errors();
@@ -44,6 +45,7 @@ if(!empty($validation_error))
 	$document_number = set_value('document_number');
 	$document_place = set_value('document_place');
 	$individual_email2 = set_value('individual_email2');
+    $kra_pin = set_value('kra_pin');
 }
 ?>
           <section class="panel">
@@ -64,6 +66,7 @@ if(!empty($validation_error))
             ?>
             
             <?php echo form_open_multipart('microfinance/update-individual/'.$individual_id, array("class" => "form-horizontal", "role" => "form"));?>
+
 <div class="row">
 	<div class="col-md-2">
     	<!-- Image -->
@@ -99,11 +102,14 @@ if(!empty($validation_error))
                 
             </div>
         </div>
+       
+
 	</div>
     
     <div class="col-md-5">
+
         <div class="form-group">
-            <label class="col-lg-5 control-label">Title: </label>
+            <label class="col-lg-5 control-label">Title *: </label>
             
             <div class="col-lg-7">
             	<select class="form-control" name="title_id">
@@ -134,31 +140,31 @@ if(!empty($validation_error))
         </div>
         
         <div class="form-group">
-            <label class="col-lg-5 control-label">Other Names: </label>
+            <label class="col-lg-5 control-label ">Other Names *: </label>
             
             <div class="col-lg-7">
-            	<input type="text" class="form-control" name="individual_onames" placeholder="Other Names" value="<?php echo $individual_onames;?>">
+            	<input type="text" class="form-control " name="individual_onames" placeholder="Other Names" value="<?php echo $individual_onames;?>" required>
             </div>
         </div>
         
         <div class="form-group">
-            <label class="col-lg-5 control-label">First Name: </label>
+            <label class="col-lg-5 control-label ">First Name *: </label>
             
             <div class="col-lg-7">
-            	<input type="text" class="form-control" name="individual_fname" placeholder="First Name" value="<?php echo $individual_fname;?>">
+            	<input type="text" class="form-control " name="individual_fname" placeholder="First Name" value="<?php echo $individual_fname;?>">
             </div>
         </div>
         
         <div class="form-group">
-            <label class="col-lg-5 control-label">Personnel number: </label>
+            <label class="col-lg-5 control-label"> KRA PIN *: </label>
             
             <div class="col-lg-7">
-            	<input type="text" class="form-control" name="individual_number" placeholder="Personnel number" value="<?php echo $individual_number;?>">
+            	<input type="text" class="form-control" name="kra_pin" placeholder="KRA PIN" value="<?php echo $kra_pin;?>" >
             </div>
         </div>
         
         <div class="form-group">
-            <label class="col-lg-5 control-label">Date of Birth: </label>
+            <label class="col-lg-5 control-label">Date of Birth *: </label>
             
             <div class="col-lg-7">
             	<div class="input-group">
@@ -171,7 +177,7 @@ if(!empty($validation_error))
         </div>
         
         <div class="form-group">
-            <label class="col-lg-5 control-label">Gender: </label>
+            <label class="col-lg-5 control-label">Gender *: </label>
             
             <div class="col-lg-7">
             	<select class="form-control" name="gender_id">
@@ -375,6 +381,104 @@ if(!empty($validation_error))
         </div>
     </div>
 </div>
-            <?php echo form_close();?>
+
+<?php echo form_close();?>
+<hr>
+
+<?php echo form_open_multipart('microfinance/update-individual-document/'.$individual_id, array("class" => "form-horizontal", "role" => "form"));?>
+    
+    <div class="row" style="margin-top:10px;">
+        <div class="col-md-12">
+             <div class="form-group">
+                <label class="col-lg-5 control-label ">Document Scan (Passport/ID) *: </label>
+                
+                <div class="col-lg-5">
+                    <input type="file" class="form-control " name="individual_document_name"  value="">
                 </div>
-            </section>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px;">
+        <div class="col-md-12">
+            <div class="form-actions center-align">
+                <button class="submit btn btn-primary" type="submit">
+                    Add document scan
+                </button>
+            </div>
+        </div>
+    </div>
+<?php echo form_close();?>
+      <section class="panel">
+            <header class="panel-heading">
+                <h2 class="panel-title">Identification Documents</h2>
+            </header>
+            <div class="panel-body">
+               <?php
+               if($individual_identifications->num_rows() > 0)
+                {
+                    $count = 0;
+                        
+                    $identification_result = 
+                    '
+                    <table class="table table-bordered table-striped table-condensed">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Document Name</th>
+                                <th colspan="3">Actions</th>
+                            </tr>
+                        </thead>
+                          <tbody>
+                          
+                    ';
+                    
+                    foreach ($individual_identifications->result() as $row)
+                    {
+                        $individual_identification_id = $row->individual_identification_id;
+                        $document_name = $row->document_name;
+                        $document_status = $row->document_status;
+                        
+                        //create deactivated status display
+                        if($document_status == 0)
+                        {
+                            $status = '<span class="label label-default">Deactivated</span>';
+                            $button = '<a class="btn btn-info" href="'.site_url().'microfinance/activate-individual-identification/'.$individual_identification_id.'/'.$individual_id.'" onclick="return confirm(\'Do you want to activate?\');" title="Activate "><i class="fa fa-thumbs-up"></i></a>';
+                        }
+                        //create activated status display
+                        else if($document_status == 1)
+                        {
+                            $status = '<span class="label label-success">Active</span>';
+                            $button = '<a class="btn btn-default" href="'.site_url().'microfinance/deactivate-individual-identification/'.$individual_identification_id.'/'.$individual_id.'" onclick="return confirm(\'Do you want to deactivate ?\');" title="Deactivate "><i class="fa fa-thumbs-down"></i></a>';
+                        }
+                        
+                        $count++;
+                        $identification_result .= 
+                        '
+                            <tr>
+                                <td>'.$count.'</td>
+                                <td><a href="'.$this->identification_document_location.''.$document_name.'" target="_blank" >Download Here</a></td>
+                                <td>'.$status.'</td>
+                                <td>'.$button.'</td>
+                                <td><a href="'.site_url().'microfinance/delete-individual-identification/'.$individual_identification_id.'/'.$individual_id.'" class="btn btn-sm btn-danger" onclick="return confirm(\'Do you really want to delete ?\');" title="Delete"><i class="fa fa-trash"></i></a></td>
+                            </tr> 
+                        ';
+                    }
+                    
+                    $identification_result .= 
+                    '
+                                  </tbody>
+                                </table>
+                    ';
+                }
+                
+                else
+                {
+                    $identification_result = "<p>No plans have been added</p>";
+                }
+                echo $identification_result;
+               ?>
+            </div>
+        </section>
+
+    </div>
+</section>

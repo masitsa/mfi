@@ -6,7 +6,13 @@ $personnel_onames = $row->personnel_username;
 $personnel_fname = $row->personnel_fname;
 $personnel_account_status = $row->personnel_account_status;
 $personnel_id = $row->personnel_id;
-$authorize_invoice_changes = $row->authorize_invoice_changes;
+$authorize_supervisor_changes = $row->authorize_supervisor_changes;
+
+
+
+// authorization levels.
+
+
 
 //repopulate data if validation errors occur
 $validation_error = validation_errors();
@@ -157,20 +163,20 @@ if(!empty($validation_error))
                             <section class="panel panel-featured panel-featured-info">
                                 <header class="panel-heading">
                                     
-                                    <h2 class="panel-title">Authorize invoice changes</h2>
+                                    <h2 class="panel-title">Assign supervisor's role</h2>
                                 </header>
                                 
                                 <div class="panel-body">
-									<?php echo form_open("hr/personnel/edit_invoice_authorize/".$personnel_id, array("class" => "form-horizontal"));?>
+									<?php echo form_open("hr/personnel/edit_supervisor_authorize/".$personnel_id, array("class" => "form-horizontal"));?>
                                         <?php
-                                        if($authorize_invoice_changes == 1)
+                                        if($authorize_supervisor_changes == 1)
                                         {
                                         ?>
                                         <div class="form-group">
                                             <div class="col-lg-6">
                                                 <div class="radio">
                                                     <label>
-                                                        <input id="optionsRadios2" type="radio" name="authorize_invoice_changes" value="1" checked="checked"> 
+                                                        <input id="optionsRadios2" type="radio" name="authorize_supervisor_changes" value="1" checked="checked"> 
                                                         Yes
                                                     </label>
                                                 </div>
@@ -178,7 +184,7 @@ if(!empty($validation_error))
                                             <div class="col-lg-6">
                                                 <div class="radio">
                                                     <label>
-                                                        <input id="optionsRadios2" type="radio" name="authorize_invoice_changes" value="0"> 
+                                                        <input id="optionsRadios2" type="radio" name="authorize_supervisor_changes" value="0"> 
                                                         No
                                                     </label>
                                                 </div>
@@ -194,7 +200,7 @@ if(!empty($validation_error))
                                             <div class="col-lg-6">
                                                 <div class="radio">
                                                     <label>
-                                                        <input id="optionsRadios2" type="radio" name="authorize_invoice_changes" value="1"> 
+                                                        <input id="optionsRadios2" type="radio" name="authorize_supervisor_changes" value="1"> 
                                                         Yes
                                                     </label>
                                                 </div>
@@ -202,7 +208,7 @@ if(!empty($validation_error))
                                             <div class="col-lg-6">
                                                 <div class="radio">
                                                     <label>
-                                                        <input id="optionsRadios2" type="radio" name="authorize_invoice_changes" value="0" checked="checked"> 
+                                                        <input id="optionsRadios2" type="radio" name="authorize_supervisor_changes" value="0" checked="checked"> 
                                                         No
                                                     </label>
                                                 </div>
@@ -224,8 +230,10 @@ if(!empty($validation_error))
                                     <?php echo form_close();?> 
 								</div>
 							</section> 
-                        </div>                       
-                    	<div class="col-md-8">
+                           
+                           
+                        </div> 
+                        <div class="col-md-8">
                             <section class="panel panel-featured panel-featured-info">
                                 <header class="panel-heading">
                                     
@@ -233,7 +241,7 @@ if(!empty($validation_error))
                                 </header>
                                 
                                 <div class="panel-body">
-									<?php
+                                    <?php
                                      // var_dump($roles->num_rows()) or die();
                                         if($roles->num_rows() > 0)
                                         {
@@ -312,9 +320,10 @@ if(!empty($validation_error))
                                             echo '<p>'.$personnel_fname.' doesn\'t have any roles assigned</p>';
                                         }
                                     ?>
-								</div>
-							</section>
-                        </div>
+                                </div>
+                            </section>
+                        </div>                      
+                    	
                     </div>
                 </div>
             </section>

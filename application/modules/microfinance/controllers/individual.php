@@ -20,6 +20,11 @@ class Individual extends microfinance
 		$this->individual_location = base_url().'assets/img/individuals/';
 		$this->signature_path = realpath(APPPATH . '../assets/img/signatures');
 		$this->signature_location = base_url().'assets/img/signatures/';
+		$this->identification_document_path = realpath(APPPATH . '../assets/img/identification_documents');
+		$this->identification_document_location = base_url().'assets/img/identification_documents/';
+
+		$this->document_upload_path = realpath(APPPATH . '../assets/img/document_uploads');
+		$this->document_upload_location = base_url().'assets/img/document_uploads/';
 	}
     
 	/*
@@ -109,6 +114,7 @@ class Individual extends microfinance
 		$this->form_validation->set_rules('individual_address', 'Address', 'xss_clean');
 		$this->form_validation->set_rules('civil_status_id', 'Civil Status', 'xss_clean');
 		$this->form_validation->set_rules('individual_locality', 'Locality', 'xss_clean');
+		$this->form_validation->set_rules('kra_pin', 'KRA PIN', 'xss_clean');
 		$this->form_validation->set_rules('title_id', 'Title', 'required|xss_clean');
 		$this->form_validation->set_rules('gender_id', 'Gender', 'required|xss_clean');
 		$this->form_validation->set_rules('individual_number', 'Individual number', 'xss_clean');
@@ -217,12 +223,117 @@ class Individual extends microfinance
 		$v_data['jobs'] = $this->individual_model->get_individual_jobs($individual_id);
 		$v_data['individual_savings'] = $this->individual_model->get_individual_savings_plans($individual_id);
 		$v_data['individual_loan'] = $this->individual_model->get_individual_loans($individual_id);
+		$v_data['individual_identifications'] = $this->individual_model->get_individual_identifications($individual_id);
+		$v_data['individual_other_documents'] = $this->individual_model->get_document_uploads($individual_id);
 		$v_data['savings_plans'] = $this->savings_plan_model->all_savings_plan();
 		$v_data['loans_plans'] = $this->loans_plan_model->all_loans_plan();
 		$v_data['parent_sections'] = $this->sections_model->all_parent_sections('section_position');
 		$data['content'] = $this->load->view('individual/edit_individual', $v_data, true);
 		
 		$this->load->view('admin/templates/general_page', $data);
+	}
+
+	/*
+	*
+	*	Add documents 
+	*	@param int $individual_id
+	*
+	*/
+	public function upload_indivudual_documents($individual_id) 
+	{
+		$resize['width'] = 400;
+		$resize['height'] = 400;
+		$image_error = '';
+		
+		$this->session->unset_userdata('upload_error_message');
+		$document_name = 'individual_document_name';
+		
+		//upload image if it has been selected
+		$response = $this->individual_model->upload_image($this->identification_document_path, $this->identification_document_location, $resize, $document_name, 'individual_document_name');
+		if($response)
+		{
+			$identification_document_location = $this->identification_document_location.$this->session->userdata($document_name);
+		}
+		
+		//case of upload error
+		else
+		{
+			$image_error = $this->session->userdata('upload_error_message');
+			$this->session->unset_userdata('upload_error_message');
+		}
+
+		$image = $this->session->userdata($document_name);
+
+		if($this->individual_model->upload_inividual_image($individual_id, $image))
+		{
+			$this->session->set_userdata('success_message', 'Individual\'s general details updated successfully');
+			$this->session->unset_userdata($document_name);
+			redirect('microfinance/edit-individual/'.$individual_id);
+		}
+		
+		else
+		{
+			$this->session->set_userdata('error_message', 'Could not update individual\'s general details. Please try again');
+			redirect('microfinance/edit-individual/'.$individual_id);
+		}
+
+	}
+
+
+	/*
+	*
+	*	Add documents 
+	*	@param int $individual_id
+	*
+	*/
+	public function upload_indivudual_other_documents($individual_id) 
+	{
+		$resize['width'] = 400;
+		$resize['height'] = 400;
+		$image_error = '';
+		$this->session->unset_userdata('upload_error_message');
+		$document_name = 'individual_document_name';
+		
+		//upload image if it has been selected
+		$response = $this->individual_model->upload_image($this->document_upload_path, $this->document_upload_location, $resize, $document_name, 'individual_document_name');
+		if($response)
+		{
+			$document_upload_location = $this->document_upload_location.$this->session->userdata($document_name);
+		}
+		
+		//case of upload error
+		else
+		{
+			$image_error = $this->session->userdata('upload_error_message');
+			$this->session->unset_userdata('upload_error_message');
+		}
+
+		$document = $this->session->userdata($document_name);
+		$this->form_validation->set_rules('document_place', 'Place of issue', 'xss_clean');
+		
+		//if form has been submitted
+		if ($this->form_validation->run())
+		{
+
+			if($this->individual_model->upload_individual_documents($individual_id, $document))
+			{
+				$this->session->set_userdata('success_message', 'Individual\'s uploads details updated successfully');
+				$this->session->unset_userdata($document_name);
+				redirect('microfinance/edit-individual/'.$individual_id);
+			}
+			
+			else
+			{
+				$this->session->set_userdata('error_message', 'Could not update individual\'s uploads details. Please try again');
+				redirect('microfinance/edit-individual/'.$individual_id);
+			}
+		}
+		else
+		{
+			$this->session->set_userdata('error_message', 'Could not update individual\'s uploads details. Please try again');
+			redirect('microfinance/edit-individual/'.$individual_id);
+		}
+
 	}
     
 	/*
@@ -246,7 +357,7 @@ class Individual extends microfinance
 		$signature_error = '';
 		
 		$this->session->unset_userdata('upload_error_message');
-		$image_upload_name = 'individual_image_name';
+		$image_upload_name = 'individual_document_name';
 		$signature_upload_name = 'individual_signature_name';
 		
 		//upload image if it has been selected
@@ -286,6 +397,7 @@ class Individual extends microfinance
 		$this->form_validation->set_rules('individual_phone2', 'Phone', 'xss_clean');
 		$this->form_validation->set_rules('individual_address', 'Address', 'xss_clean');
 		$this->form_validation->set_rules('civil_status_id', 'Civil Status', 'xss_clean');
+		$this->form_validation->set_rules('kra_pin', 'KRA PIN', 'xss_clean');
 		$this->form_validation->set_rules('individual_locality', 'Locality', 'xss_clean');
 		$this->form_validation->set_rules('title_id', 'Title', 'required|xss_clean');
 		$this->form_validation->set_rules('gender_id', 'Gender', 'required|xss_clean');
@@ -374,6 +486,7 @@ class Individual extends microfinance
 		$this->form_validation->set_rules('document_id', 'Document type', 'xss_clean');
 		$this->form_validation->set_rules('document_number', 'Document number', 'xss_clean');
 		$this->form_validation->set_rules('document_place', 'Place of issue', 'xss_clean');
+		$this->form_validation->set_rules('share_percentage', 'Place of issue', 'required|xss_clean');
 		
 		//if form has been submitted
 		if ($this->form_validation->run())
