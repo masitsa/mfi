@@ -2,7 +2,8 @@
 //individual data
 $row = $individual->row();
 
-$individual_onames = $row->individual_onames;
+$individual_lname = $row->individual_lname;
+$individual_mname = $row->individual_mname;
 $individual_fname = $row->individual_fname;
 $individual_dob = $row->individual_dob;
 $individual_email = $row->individual_email;
@@ -50,7 +51,7 @@ if(!empty($validation_error))
 ?>
           <section class="panel">
                 <header class="panel-heading">
-                    <h2 class="panel-title">About <?php echo $individual_onames.' '.$individual_fname;?></h2>
+                    <h2 class="panel-title">About <?php echo $individual_lname.' '.$individual_fname.' '.$individual_mname;?></h2>
                 </header>
                 <div class="panel-body">
                 <!-- Adding Errors -->
@@ -143,7 +144,7 @@ if(!empty($validation_error))
             <label class="col-lg-5 control-label ">Other Names *: </label>
             
             <div class="col-lg-7">
-            	<input type="text" class="form-control " name="individual_onames" placeholder="Other Names" value="<?php echo $individual_onames;?>" required>
+            	<input type="text" class="form-control " name="individual_onames" placeholder="Other Names" value="<?php echo $individual_mname;?>" required>
             </div>
         </div>
         

@@ -127,7 +127,7 @@ class Individual_model extends CI_Model
 	public function add_individual()
 	{
 		$data = array(
-			'individual_onames'=>ucwords(strtolower($this->input->post('individual_onames'))),
+			'individual_lname'=>ucwords(strtolower($this->input->post('individual_onames'))),
 			'individual_fname'=>ucwords(strtolower($this->input->post('individual_fname'))),
 			'individual_dob'=>$this->input->post('individual_dob'),
 			'individual_email'=>$this->input->post('individual_email'),
@@ -786,7 +786,7 @@ class Individual_model extends CI_Model
 		//get loan details
 		$this->db->select('loans_plan.interest_id, loans_plan.interest_rate, installment_type.installment_type_duration');
 		$this->db->where('loans_plan_id', $loans_plan_id);
-		$this->db->join('installment_type', 'installment_type.installment_type_id = loans_plan.loans_plan_id', 'left');
+		$this->db->join('installment_type', 'installment_type.installment_type_id = loans_plan.installment_type_id', 'left');
 		$query = $this->db->get('loans_plan');
 		
 		if($query->num_rows() > 0)
@@ -931,7 +931,7 @@ class Individual_model extends CI_Model
 	public function get_guarantors($individual_loan_id)
 	{
 		$this->db->from('individual, loan_guarantor');
-		$this->db->select('individual.individual_fname, individual.individual_onames, loan_guarantor.loan_guarantor_id, loan_guarantor.created_by, loan_guarantor.created, loan_guarantor.guaranteed_amount, personnel.personnel_fname, personnel.personnel_onames');
+		$this->db->select('individual.individual_fname, individual.individual_mname, individual.individual_lname, loan_guarantor.loan_guarantor_id, loan_guarantor.created_by, loan_guarantor.created, loan_guarantor.guaranteed_amount, personnel.personnel_fname, personnel.personnel_onames');
 		$this->db->order_by('individual_fname', 'DESC');
 		$this->db->join('personnel', 'personnel.personnel_id = loan_guarantor.created_by', 'left');
 		$this->db->where('loan_guarantor.loan_guarantor_delete <> 1 AND individual.individual_id = loan_guarantor.individual_id AND loan_guarantor.individual_loan_id = '.$individual_loan_id);
@@ -1054,6 +1054,23 @@ class Individual_model extends CI_Model
 	{
 		$this->db->from('individual_loan');
 		$this->db->where('individual_loan.individual_loan_id = '.$individual_loan_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	
+	/*
+	*	get a single individual's details
+	*	@param int $individual_id
+	*
+	*/
+	public function get_savings_payments($individual_id)
+	{
+		//retrieve all users
+		$this->db->from('savings_payment');
+		$this->db->select('*');
+		$this->db->where('savings_payment.individual_id = '.$individual_id.' AND savings_payment.savings_payment_delete = 0');
+		$this->db->order_by('payment_date', 'DESC');
 		$query = $this->db->get();
 		
 		return $query;

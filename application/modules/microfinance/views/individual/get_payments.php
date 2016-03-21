@@ -2,6 +2,8 @@
 	
 	$loan_details = $this->individual_model->get_individual_loan($individual_loan_id);
 	$payments = $this->individual_model->get_loan_payments($individual_loan_id);
+	$total_payment_amount = 0;
+	$total_payment_interest = 0;
 	
 	if($payments->num_rows() > 0)
 	{
@@ -23,8 +25,6 @@
 			  <tbody>
 			  
 		';
-		$total_payment_amount = 0;
-		$total_payment_interest = 0;
 		$count = 0;
 		foreach ($payments->result() as $row)
 		{
@@ -111,13 +111,13 @@ for($r = 0; $r < $no_of_repayments; $r++)
 	//straight line
 	if($interest_id == 1)
 	{
-		$total_interest += ($loan_amount * ($interest_rate/100)) / $no_of_repayments;
+		$total_interest += ($loan_amount * ($interest_rate/100));
 	}
 	
 	//reducing balance
 	else
 	{
-		$total_interest += ($start_balance * ($interest_rate/100)) / $no_of_repayments;
+		$total_interest += ($start_balance * ($interest_rate/100));
 	}
 	$principal_payment = $loan_amount / $no_of_repayments;
 	$start_balance -= $principal_payment;
@@ -132,40 +132,28 @@ for($r = 0; $r < $no_of_repayments; $r++)
                     
                     <table class="table table-condensed table-bordered table-striped table-hover">
                     	<tr>
-                        	<th>Loan Amount</th>
+                        	<th></th>
+                        	<th>Principal</th>
+                        	<th>Payments</th>
+                        	<th>Balances</th>
+                        </tr>
+                    	<tr>
+                        	<th>Amount</th>
                             <td><?php echo number_format($loan_amount, 2);?></td>
-                        </tr>
-                    	<tr>
-                        	<th>Loan Interest</th>
-                            <td><?php echo number_format($total_interest, 2);?></td>
-                        </tr>
-                    	<tr>
-                        	<th>Loan Amount + Interest</th>
-                            <td><?php echo number_format(($total_interest + $loan_amount), 2);?></td>
-                        </tr>
-                    </table>
-                    
-                    <table class="table table-condensed table-bordered table-striped table-hover">
-                    	<tr>
-                        	<th colspan="2" align="center">Interest</th>
-                        	<th colspan="2" align="center">Loan</th>
-                        	<th colspan="2" align="center">Total amount</th>
-                        </tr>
-                    	<tr>
-                        	<th>Interest paid</th>
-                        	<th>Interest balance</th>
-                        	<th>Loan paid</th>
-                        	<th>Loan balance</th>
-                        	<th>Total paid</th>
-                        	<th>Total balance</th>
-                        </tr>
-                    	<tr>
-                            <td><?php echo number_format($total_payment_interest, 2);?></td>
-                            <td><?php echo number_format(($total_interest - $total_payment_interest), 2);?></td>
                             <td><?php echo number_format($total_payment_amount, 2);?></td>
                             <td><?php echo number_format(($loan_amount - $total_payment_amount), 2);?></td>
-                            <td><?php echo number_format(($total_payment_interest + $total_payment_amount), 2);?></td>
-                            <td><?php echo number_format((($total_interest + $loan_amount) - ($total_payment_interest + $total_payment_amount)), 2);?></td>
+                        </tr>
+                    	<tr>
+                        	<th>Interest</th>
+                            <td><?php echo number_format($total_interest, 2);?></td>
+                            <td><?php echo number_format($total_payment_interest, 2);?></td>
+                            <td><?php echo number_format(($total_interest - $total_payment_interest), 2);?></td>
+                        </tr>
+                    	<tr>
+                        	<th>Total</th>
+                            <th align="center"><?php echo number_format(($total_interest + $loan_amount), 2);?></th>
+                            <th align="center"><?php echo number_format(($total_payment_interest + $total_payment_amount), 2);?></th>
+                            <th align="center"><?php echo number_format((($total_interest + $loan_amount) - ($total_payment_interest + $total_payment_amount)), 2);?></th>
                         </tr>
                     </table>
                     <?php 

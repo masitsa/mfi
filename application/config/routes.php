@@ -230,6 +230,9 @@ $route['hospital-administration/deactivate-insurance-company/(:num)'] = 'hospita
 /*
 *	Accounts Routes
 */
+$route['accounts/petty-cash'] = 'accounts/petty_cash/index';
+$route['accounts/petty-cash/(:any)/(:any)'] = 'accounts/petty_cash/index/$1/$2';
+$route['accounts/petty-cash/(:any)'] = 'accounts/petty_cash/index/$1';
 $route['accounts/closed-visits'] = 'accounts/payroll/accounts_closed_visits';
 $route['accounts/un-closed-visits'] = 'accounts/payroll/accounts_unclosed_queue';
 $route['accounts/change-branch'] = 'accounts/payroll/change_branch';
@@ -525,7 +528,6 @@ $route['accounts/dashboard'] = 'accounts/index';
 $route['accounts/accounts-queue'] = 'accounts/accounts_queue/12';
 $route['accounts/general-queue'] = 'reception/general_queue/accounts';
 
-
 /*
 *	Cloud Routes
 */
@@ -541,3 +543,36 @@ $route['cloud/deactivate-sync-table/(:num)'] = 'cloud/sync_tables/deactivate_syn
 $route['pharmacy/validate-import'] = 'pharmacy/do_drugs_import';
 $route['pharmacy/import-template'] = 'pharmacy/import_template';
 $route['pharmacy/import-drugs'] = 'pharmacy/import_drugs';
+
+/*
+*	Individual import Routes
+*/
+$route['import/individuals'] = 'microfinance/import/import_individuals';
+$route['import/individuals-template'] = 'microfinance/import/import_individuals_template';
+$route['import/import-individuals'] = 'microfinance/import/do_individuals_import';
+
+/*
+*	Savings import Routes
+*/
+$route['import/savings'] = 'microfinance/import/import_savings';
+$route['import/savings-template'] = 'microfinance/import/import_savings_template';
+$route['import/import-savings'] = 'microfinance/import/do_savings_import';
+
+/*
+*	Loans import Routes
+*/
+$route['import/loans'] = 'microfinance/import/import_loans';
+$route['import/loans-template'] = 'microfinance/import/import_loans_template';
+$route['import/import-loans'] = 'microfinance/import/do_loans_import';
+
+/*
+*	Loans import Routes
+*/
+$route['import/loan-payments'] = 'microfinance/import/import_loan_payments';
+$route['import/loan-payments-template'] = 'microfinance/import/import_loan_payments_template';
+$route['import/import-loan-payments'] = 'microfinance/import/do_loan_payments_import';
+
+/*
+*	MFI Reports Routes
+*/
+$route['mfi-reports/dashboard'] = 'microfinance/reports/dashboard';

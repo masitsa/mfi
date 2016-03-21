@@ -52,7 +52,8 @@ class Reception_model extends CI_Model
 		$this->db->from($table);
 		$this->db->select('visit.*, visit_department.created AS visit_created, visit_department.accounts, patients.*, visit_type.visit_type_name');
 		$this->db->where($where);
-		$this->db->order_by('visit_department.created','ASC');
+		//$this->db->order_by('visit_department.created','ASC');
+		$this->db->order_by('visit.visit_time','ASC');
 		$query = $this->db->get('', $per_page, $page);
 		
 		return $query;
@@ -63,7 +64,7 @@ class Reception_model extends CI_Model
 		$this->db->from($table);
 		$this->db->select('visit.*, patients.*, visit_type.visit_type_name');
 		$this->db->where($where);
-		$this->db->order_by('visit.visit_date','ASC');
+		$this->db->order_by('visit.visit_date','DESC');
 		$query = $this->db->get('', $per_page, $page);
 		
 		return $query;
@@ -155,9 +156,10 @@ class Reception_model extends CI_Model
 			'modified_by'=>$this->session->userdata('personnel_id'),
 			'visit_type_id'=>2,
 			'dependant_id'=>$this->input->post('dependant_id'),
-			//'insurance_company_id'=>$this->input->post('insurance_company_id'),
+			'current_patient_number'=>$this->input->post('current_patient_number'),
 			'branch_code'=>$this->session->userdata('branch_code'),
-			'patient_kin_phonenumber1'=>$this->input->post('next_of_kin_contact')
+			'patient_kin_phonenumber1'=>$this->input->post('next_of_kin_contact'),
+			'current_patient_number'=>$this->input->post('current_patient_number'),
 		);
 		
 		if($this->db->insert('patients', $data))
@@ -193,9 +195,10 @@ class Reception_model extends CI_Model
 			'modified_by'=>$this->session->userdata('personnel_id'),
 			'visit_type_id'=>3,
 			'dependant_id'=>$this->input->post('dependant_id'),
-			'insurance_company_id'=>$this->input->post('insurance_company_id'),
+			'current_patient_number'=>$this->input->post('current_patient_number'),
 			'branch_code'=>$this->session->userdata('branch_code'),
-			'patient_kin_phonenumber1'=>$this->input->post('next_of_kin_contact')
+			'patient_kin_phonenumber1'=>$this->input->post('next_of_kin_contact'),
+			'current_patient_number'=>$this->input->post('current_patient_number'),
 		);
 		
 		$this->db->where('patient_id', $patient_id);
@@ -368,6 +371,19 @@ class Reception_model extends CI_Model
 		
 		return $result;
 	}
+	
+	public function get_service_charges2($visit_id)
+	{
+		$table = "service_charge";
+		$where = "service_charge.service_id = 1 AND service_charge.visit_type_id = (SELECT visit_type FROM visit WHERE visit_id = $visit_id)";
+		$items = "service_charge.service_charge_name, service_charge_id";
+		$order = "service_charge_name";
+		
+		
+		$result = $this->database->select_entries_where($table, $where, $items, $order);
+		
+		return $result;
+	}
 	public function get_service_charge($id)
 	{
 		$table = "service_charge";
@@ -443,7 +459,7 @@ class Reception_model extends CI_Model
 		{
 			$table = "patients, visit";
 			$where = "patients.patient_id = visit.patient_id AND visit.visit_id = ".$visit_id;
-			$items = "patients.*, visit.visit_type";
+			$items = "patients.*, visit.visit_type, visit.ward_id, visit.patient_insurance_number, visit.inpatient, visit.close_card";
 			$order = "patient_surname";
 		}
 		
@@ -452,22 +468,22 @@ class Reception_model extends CI_Model
 		foreach ($result as $row)
 		{
 			$patient_id = $row->patient_id;
-			$dependant_id = $row->dependant_id;
 			$patient_number = $row->patient_number;
-			$dependant_id = $row->dependant_id;
-			$strath_no = $row->strath_no;
 			$created_by = $row->created_by;
 			$modified_by = $row->modified_by;
 			$created = $row->patient_date;
 			$last_modified = $row->last_modified;
 			$last_visit = $row->last_visit;
-			
+			$ward_id = $row->ward_id;
 			$patient_national_id = $row->patient_national_id;
 			$patient_othernames = $row->patient_othernames;
 			$patient_surname = $row->patient_surname;
 			$patient_date_of_birth = $row->patient_date_of_birth;
 			$gender_id = $row->gender_id;
+			
 			$faculty ='';
+			$dependant_id = '';
+			$close_card = '';
 			if($gender_id == 1)
 			{
 				$gender = 'M';
@@ -480,15 +496,20 @@ class Reception_model extends CI_Model
 			{
 				$visit_type_id = '';
 				$visit_type_name = '';
+				$patient_insurance_number = '';
+				$inpatient = '';
 			}
 			
 			else
 			{
+				$inpatient = $row->inpatient;
+				$patient_insurance_number = $row->patient_insurance_number;
 				$visit_type_id = $row->visit_type;
 				$this->db->where('visit_type_id', $visit_type_id);
 				$this->db->select('visit_type_name');
 				$query = $this->db->get('visit_type');
 				$visit_type_name = '';
+				$close_card = $row->close_card;
 				
 				if($query->num_rows() > 0)
 				{
@@ -501,6 +522,8 @@ class Reception_model extends CI_Model
 		$this->load->model('administration/administration_model');
 		$account_balance = $this->administration_model->patient_account_balance($patient_id);
 		// end of patient balance
+		$patient['patient_insurance_number'] = $patient_insurance_number;
+		$patient['inpatient'] = $inpatient;
 		$patient['patient_id'] = $patient_id;
 		$patient['account_balance'] = $account_balance;
 		$patient['patient_national_id'] = $patient_national_id;
@@ -515,6 +538,8 @@ class Reception_model extends CI_Model
 		$patient['patient_number'] = $patient_number;
 		$patient['faculty'] = $faculty;
 		$patient['staff_dependant_no'] = $dependant_id;
+		$patient['close_card'] = $close_card;
+		$patient['ward_id'] = $ward_id;
 		return $patient;
 	}
 	
@@ -1707,6 +1732,7 @@ class Reception_model extends CI_Model
 		$this->db->from('departments');
 		$this->db->select('*');
 		$this->db->where('visit = 1');
+		$this->db->order_by('department_name');
 		$query = $this->db->get();
 		
 		return $query;
@@ -1805,7 +1831,7 @@ class Reception_model extends CI_Model
 					$data['accounts'] = 0;
 				}
 			}
-			
+			//var_dump($data);die();
 			if($this->db->insert('visit_department', $data))
 			{
 				return TRUE;
@@ -1916,7 +1942,7 @@ class Reception_model extends CI_Model
 	public function get_visit_trail($visit_id)
 	{
 		$where = 'visit_department.visit_id = '.$visit_id.' AND visit_department.department_id = departments.department_id';
-		$this->db->select('departments.department_name, visit_department.*');
+		$this->db->select('departments.department_name, visit_department.*, personnel.personnel_fname');
 		$this->db->where($where);
 		$this->db->join('personnel', 'visit_department.created_by = personnel.personnel_id', 'left');
 		$this->db->order_by('visit_department.created','ASC');
@@ -2187,8 +2213,8 @@ class Reception_model extends CI_Model
 			for($r = 1; $r < $total_rows; $r++)
 			{
 				$current_patient_number = $array[$r][0];
-				$items['patient_surname'] = ucwords(strtolower($array[$r][1]));
-				$items['patient_othernames'] = ucwords(strtolower($array[$r][2]));
+				$items['patient_surname'] = mysql_real_escape_string(ucwords(strtolower($array[$r][1])));
+				$items['patient_othernames'] = mysql_real_escape_string(ucwords(strtolower($array[$r][2])));
 				$title = $array[$r][3];
 				$items['patient_date_of_birth'] = $array[$r][4];
 				$civil_status_id = $array[$r][5];
@@ -2309,6 +2335,280 @@ class Reception_model extends CI_Model
 		$this->db->where('branch_status = 1');
 		$this->db->order_by('branch_name', 'ASC');
 		return $this->db->get('branch');
+	}
+	
+	public function get_patient_type()
+	{
+		$this->db->order_by('visit_type_name', 'ASC');
+		return $this->db->get('visit_type');
+	}
+
+	
+	public function get_wards()
+	{
+		$this->db->order_by('ward_name', 'ASC');
+		return $this->db->get('ward');
+	}
+	
+	public function create_inpatient_visit($visit_date, $patient_id, $doctor_id, $insurance_limit, $insurance_number, $visit_type_id, $close_card, $ward_id)
+	{
+		$visit_data = array(
+			"branch_code" => $this->session->userdata('branch_code'),
+			"visit_date" => $visit_date,
+			"patient_id" => $patient_id,
+			"personnel_id" => $doctor_id,
+			"insurance_limit" => $insurance_limit,
+			"patient_insurance_number" => $insurance_number,
+			"visit_type" => $visit_type_id,
+			"appointment_id"=> 0,
+			"close_card" => $close_card,
+			"ward_id" => $ward_id,
+			"inpatient" => 1
+		);
+		$this->db->insert('visit', $visit_data);
+		$visit_id = $this->db->insert_id();
+		
+		return $visit_id;
+	}
+	
+	public function save_admission_fee($visit_type_id, $visit_id)
+	{
+		//get admission fee charge
+		$admission_fee = 0;
+		$service_charge_id = 0;
+		
+		$this->db->select('service_charge_amount, service_charge_id');
+		$this->db->where('visit_type_id = '.$visit_type_id.' AND service_charge_name = \'Admission fee\' AND service_charge_status = 1');
+		$query = $this->db->get('service_charge');
+		
+		if($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$admission_fee = $row->service_charge_amount;
+			$service_charge_id = $row->service_charge_id;
+		}
+		
+		if($service_charge_id > 0)
+		{
+			$data = array(
+				"visit_id" => $visit_id,
+				"service_charge_id" => $service_charge_id,
+				"created_by" => $this->session->userdata("personnel_id"),
+				"date" => date("Y-m-d"),
+				"visit_charge_amount" => $admission_fee,
+			);
+			
+			if($this->db->insert('visit_charge', $data))
+			{
+				return TRUE;
+			}
+			
+			else
+			{
+				return FALSE;
+			}
+		}
+		
+		else
+		{
+			return FALSE;
+		}
+	}
+	
+	public function get_inpatient_visits($table, $where, $per_page, $page, $order = NULL)
+	{
+		//retrieve all users
+		$this->db->from($table);
+		$this->db->select('visit.*, visit.visit_date AS visit_created, patients.*, visit_type.visit_type_name, ward.ward_name');
+		$this->db->where($where);
+		$this->db->order_by('visit_created','ASC');
+		$query = $this->db->get('', $per_page, $page);
+		
+		return $query;
+	}
+	
+	public function get_visit_bed($visit_id)
+	{
+		//retrieve all users
+		$this->db->from('visit_bed, ward, room, bed');
+		$this->db->select('ward.ward_name, room.room_name, bed.bed_number');
+		$this->db->where('visit_bed.visit_bed_status = 1 AND visit_bed.bed_id = bed.bed_id AND bed.room_id = room.room_id AND room.ward_id = ward.ward_id AND visit_bed.visit_id = '.$visit_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	// changing ksh to osh
+
+
+	public function changing_to_osh()
+	{
+		$this->db->where('branch_code = "OSH"');
+		$query = $this->db->get('patients');
+
+		if($query->num_rows() > 0)
+		{
+			// get the patient in a loop 
+
+			foreach ($query->result() as $key) {
+				# code...
+				$patient_number = $key->patient_number;
+				$patient_id = $key->patient_id;
+
+				$pieces = explode("-", $patient_number);
+				$prefix = $pieces[0]; // piece1
+				$postfix = $pieces[1]; // piece2
+
+				$new_prefix = "OSH-".$postfix."";
+
+				// create update statement
+				$data2 = array('patient_number' => $new_prefix);
+		    	$this->db->where('patient_id  ='.$patient_id);
+				$this->db->update('patients',$data2);
+			}
+
+		}
+	}
+	
+	public function is_card_held($visit_id)
+	{
+		$this->db->where('visit_id', $visit_id);
+		$this->db->join('personnel', 'personnel.personnel_id = visit.held_by', 'left');
+		$query = $this->db->get('visit');
+		if($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$close_card = $row->close_card;
+			$held_by = $row->personnel_fname.' '.$row->personnel_onames;
+			
+			if($close_card == 7)
+			{
+				$this->session->set_userdata('error_message', 'You cannot close this card. It has been held by '.$held_by);
+				return TRUE;
+			}
+			
+			else
+			{
+				return FALSE;
+			}
+		}
+		
+		else
+		{
+			return FALSE;
+		}
+	}
+	
+	public function change_patient_visit($visit_date, $doctor_id, $visit_id, $ward_id)
+	{
+		$visit_data = array(
+			"visit_date" => $visit_date,
+			"personnel_id" => $doctor_id,
+			"ward_id" => $ward_id,
+			"inpatient" => 1
+		);
+		$this->db->where('visit_id', $visit_id);
+		if($this->db->update('visit', $visit_data))
+		{
+			return TRUE;
+		}
+		
+		else
+		{
+			return FALSE;
+		}
+	}
+	
+	public function get_personnel($personnel_id)
+	{
+		$this->db->where('personnel_id', $personnel_id);
+		$query = $this->db->get('personnel');
+		
+		return $query;
+	}
+	public function close_todays_visits()
+	{
+		$date = date('Y-m-d');
+
+		$this->db->select('visit_id');
+		$this->db->where('visit_date < "'.$date.'" AND close_card = 0');
+		$query = $this->db->get('visit');
+
+		if($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $key) {
+				# code...
+				$visit_id = $key->visit_id;
+
+				$response = $this->sync_model->syn_up_on_closing_visit($visit_id);
+			}
+		}
+		else
+		{
+			$response = 'data not found';
+		}
+		return $response;
+	}
+	/*
+	*	Retrieve a single dependant
+	*	@param int $strath_no
+	*
+	*/
+	public function get_visit($visit_id)
+	{
+		$this->db->from('visit');
+		$this->db->select('*');
+		$this->db->where('visit_id', $visit_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	/*
+	*	Retrieve a single dependant
+	*	@param int $strath_no
+	*
+	*/
+	public function get_visit_depts($visit_id)
+	{
+		$this->db->from('visit_department');
+		$this->db->select('*');
+		$this->db->where('visit_id', $visit_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	/*
+	*	Retrieve a single dependant
+	*	@param int $strath_no
+	*
+	*/
+	public function get_visit_charges($visit_id)
+	{
+		$this->db->from('visit_charge, service_charge');
+		$this->db->select('*');
+		$this->db->where('visit_charge.service_charge_id = service_charge.service_charge_id AND visit_id = '.$visit_id);
+		$query = $this->db->get();
+		
+		return $query;
+	}
+	
+	public function update_visit($visit_date, $visit_id, $doctor_id, $insurance_limit, $insurance_number, $visit_type_id, $timepicker_start, $timepicker_end, $appointment_id, $close_card, $visit_id)
+	{
+		$visit_data = array(
+			"branch_code" => $this->session->userdata('branch_code'),
+			"visit_date" => $visit_date,
+			"personnel_id" => $doctor_id,
+			"insurance_limit" => $insurance_limit,
+			"patient_insurance_number" => $insurance_number,
+			"visit_type" => $visit_type_id,
+			"time_start"=>$timepicker_start,
+			"time_end"=>$timepicker_end,
+			"appointment_id"=>$appointment_id,
+			"close_card"=>$close_card,
+		);
+		$this->db->where('visit_id', $visit_id);
+		$this->db->update('visit', $visit_data);
+		
+		return $visit_id;
 	}
 }
 ?>

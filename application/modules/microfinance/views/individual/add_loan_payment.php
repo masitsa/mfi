@@ -1,5 +1,7 @@
 <?php
 	
+	$total_payment_amount = 0;
+	$total_payment_interest = 0;
 	if($payments->num_rows() > 0)
 	{
 		$count = 0;
@@ -21,8 +23,6 @@
 			  <tbody>
 			  
 		';
-		$total_payment_amount = 0;
-		$total_payment_interest = 0;
 		$count = 0;
 		foreach ($payments->result() as $row)
 		{
@@ -79,7 +79,7 @@
 //repopulate data if validation errors occur
 $validation_error = validation_errors();
 				
-$payment_date = set_value('payment_date');
+$payment_date2 = set_value('payment_date');
 $payment_amount = set_value('payment_amount');
 $payment_interest = set_value('payment_interest');
 
@@ -117,13 +117,13 @@ for($r = 0; $r < $no_of_repayments; $r++)
 	//straight line
 	if($interest_id == 1)
 	{
-		$total_interest += ($loan_amount * ($interest_rate/100)) / $no_of_repayments;
+		$total_interest += ($loan_amount * ($interest_rate/100));
 	}
 	
 	//reducing balance
 	else
 	{
-		$total_interest += ($start_balance * ($interest_rate/100)) / $no_of_repayments;
+		$total_interest += ($start_balance * ($interest_rate/100));
 	}
 	$principal_payment = $loan_amount / $no_of_repayments;
 	$start_balance -= $principal_payment;
@@ -135,6 +135,23 @@ for($r = 0; $r < $no_of_repayments; $r++)
                     <h2 class="panel-title">Loans payments</h2>
                 </header>
                 <div class="panel-body">
+					<?php
+                    $success = $this->session->userdata('success_message');
+
+                    if(!empty($success))
+                    {
+                        echo '<div class="alert alert-success"> <strong>Success!</strong> '.$success.' </div>';
+                        $this->session->unset_userdata('success_message');
+                    }
+                    
+                    $error = $this->session->userdata('error_message');
+                    
+                    if(!empty($error))
+                    {
+                        echo '<div class="alert alert-danger"> <strong>Oh snap!</strong> '.$error.' </div>';
+                        $this->session->unset_userdata('error_message');
+                    }
+                    ?>
             
 					<?php echo form_open($this->uri->uri_string(), array("class" => "form-horizontal", "role" => "form"));?>
                         <div class="row">
@@ -173,7 +190,7 @@ for($r = 0; $r < $no_of_repayments; $r++)
                                             <span class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </span>
-                                            <input data-format="yyyy-MM-dd" type="text" data-plugin-datepicker class="form-control" name="payment_date" placeholder="Payment date" value="<?php echo $payment_date;?>" autocomplete="off">
+                                            <input data-format="yyyy-MM-dd" type="text" data-plugin-datepicker class="form-control" name="payment_date" placeholder="Payment date" value="<?php echo $payment_date2;?>" autocomplete="off">
                                         </div>
                                     </div>
                                 </div>
@@ -192,63 +209,35 @@ for($r = 0; $r < $no_of_repayments; $r++)
                     <?php echo form_close();?>
                     
                     <a href="<?php echo site_url();?>microfinance/edit-individual/<?php echo $source_individual_id;?>" class="btn btn-sm btn-info pull-right">Back to loan</a>
-                    <h4>Payments</h4>
-					<?php
-                    $success = $this->session->userdata('success_message');
-
-                    if(!empty($success))
-                    {
-                        echo '<div class="alert alert-success"> <strong>Success!</strong> '.$success.' </div>';
-                        $this->session->unset_userdata('success_message');
-                    }
-                    
-                    $error = $this->session->userdata('error_message');
-                    
-                    if(!empty($error))
-                    {
-                        echo '<div class="alert alert-danger"> <strong>Oh snap!</strong> '.$error.' </div>';
-                        $this->session->unset_userdata('error_message');
-                    }
-                    ?>
+                    <h4>Statement</h4>
                     
                     <table class="table table-condensed table-bordered table-striped table-hover">
                     	<tr>
-                        	<th>Loan Amount</th>
+                        	<th></th>
+                        	<th>Principal</th>
+                        	<th>Payments</th>
+                        	<th>Balances</th>
+                        </tr>
+                    	<tr>
+                        	<th>Amount</th>
                             <td><?php echo number_format($loan_amount, 2);?></td>
-                        </tr>
-                    	<tr>
-                        	<th>Loan Interest</th>
-                            <td><?php echo number_format($total_interest, 2);?></td>
-                        </tr>
-                    	<tr>
-                        	<th>Loan Amount + Interest</th>
-                            <td><?php echo number_format(($total_interest + $loan_amount), 2);?></td>
-                        </tr>
-                    </table>
-                    
-                    <table class="table table-condensed table-bordered table-striped table-hover">
-                    	<tr>
-                        	<th colspan="2" align="center">Interest</th>
-                        	<th colspan="2" align="center">Loan</th>
-                        	<th colspan="2" align="center">Total amount</th>
-                        </tr>
-                    	<tr>
-                        	<th>Interest paid</th>
-                        	<th>Interest balance</th>
-                        	<th>Loan paid</th>
-                        	<th>Loan balance</th>
-                        	<th>Total paid</th>
-                        	<th>Total balance</th>
-                        </tr>
-                    	<tr>
-                            <td><?php echo number_format($total_payment_interest, 2);?></td>
-                            <td><?php echo number_format(($total_interest - $total_payment_interest), 2);?></td>
                             <td><?php echo number_format($total_payment_amount, 2);?></td>
                             <td><?php echo number_format(($loan_amount - $total_payment_amount), 2);?></td>
-                            <td><?php echo number_format(($total_payment_interest + $total_payment_amount), 2);?></td>
-                            <td><?php echo number_format((($total_interest + $loan_amount) - ($total_payment_interest + $total_payment_amount)), 2);?></td>
+                        </tr>
+                    	<tr>
+                        	<th>Interest</th>
+                            <td><?php echo number_format($total_interest, 2);?></td>
+                            <td><?php echo number_format($total_payment_interest, 2);?></td>
+                            <td><?php echo number_format(($total_interest - $total_payment_interest), 2);?></td>
+                        </tr>
+                    	<tr>
+                        	<th>Total</th>
+                            <th align="center"><?php echo number_format(($total_interest + $loan_amount), 2);?></th>
+                            <th align="center"><?php echo number_format(($total_payment_interest + $total_payment_amount), 2);?></th>
+                            <th align="center"><?php echo number_format((($total_interest + $loan_amount) - ($total_payment_interest + $total_payment_amount)), 2);?></th>
                         </tr>
                     </table>
+                    <h4>Payments</h4>
                     <?php 
                         echo $result;
                     ?>

@@ -337,6 +337,7 @@ class Loans_plan extends microfinance
 			$maximum_number_of_guarantors =$row->maximum_number_of_guarantors;
 			$minimum_number_of_guarantors =$row->minimum_number_of_guarantors;
 			$custom_number_of_guarantors =$row->custom_number_of_guarantors;
+			$interest_rate =$row->interest_rate;
 			
 			if($charge_interest_over_grace_period == 1)
 			{
@@ -369,6 +370,10 @@ class Loans_plan extends microfinance
 											<tr>
 												<th>Interest type</th>
 												<td>'.$interest_name.'</td>
+											</tr>
+											<tr>
+												<th>Interest rate</th>
+												<td>'.$interest_rate.'</td>
 											</tr>
 											<tr>
 												<th>Installment type</th>

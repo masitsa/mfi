@@ -2,7 +2,8 @@
 //individual data
 $row = $individual->row();
 
-$individual_onames = $row->individual_onames;
+$individual_lname = $row->individual_lname;
+$individual_mname = $row->individual_mname;
 $individual_fname = $row->individual_fname;
 $individual_email = $row->individual_email;
 $individual_phone = $row->individual_phone;
@@ -15,7 +16,7 @@ $individual_number = $row->individual_number;
                 <header class="panel-heading">
                 	<div class="row">
 	                	<div class="col-md-6">
-		                    <h2 class="panel-title">Edit <?php echo $individual_fname.' '.$individual_onames;?></h2>
+		                    <h2 class="panel-title">Edit <?php echo $individual_fname.' '.$individual_mname.' '.$individual_lname;?></h2>
 		                    <i class="fa fa-user"/></i>
 		                    <span id="work_email"><?php echo $individual_number;?></span>
 		                    <i class="fa fa-phone"/></i>
@@ -63,12 +64,6 @@ $individual_number = $row->individual_number;
 										<a class="text-center" data-toggle="tab" href="#general"><i class="fa fa-user"></i> General details</a>
 									</li>
 									<li>
-										<a class="text-center" data-toggle="tab" href="#account"><i class="fa fa-money"></i> Savings</a>
-									</li>
-									<li>
-										<a class="text-center" data-toggle="tab" href="#loans"><i class="fa fa-balance-scale"></i> Loans</a>
-									</li>
-									<li>
 										<a class="text-center" data-toggle="tab" href="#emergency">Next of kin</a>
 									</li>
 									<li>
@@ -81,18 +76,15 @@ $individual_number = $row->individual_number;
 										<a class="text-center" data-toggle="tab" href="#account"><i class="fa fa-money"></i> Savings</a>
 									</li>
 									<li>
+										<a class="text-center" data-toggle="tab" href="#loans"><i class="fa fa-balance-scale"></i> Loans</a>
+									</li>
+									<li>
 										<a class="text-center" data-toggle="tab" href="#history">History</a>
 									</li>
 								</ul>
 								<div class="tab-content">
 									<div class="tab-pane active" id="general">
 										<?php echo $this->load->view('edit/about', '', TRUE);?>
-									</div>
-									<div class="tab-pane" id="account">
-										<?php echo $this->load->view('edit/account', '', TRUE);?>
-									</div>
-									<div class="tab-pane" id="loans">
-										<?php echo $this->load->view('edit/loans', '', TRUE);?>
 									</div>
 									<div class="tab-pane" id="emergency">
 										<?php echo $this->load->view('edit/emergency', '', TRUE);?>
@@ -103,8 +95,11 @@ $individual_number = $row->individual_number;
 									<div class="tab-pane" id="uploads">
 										<?php echo $this->load->view('edit/uploads', '', TRUE);?>
 									</div>
+									<div class="tab-pane" id="loans">
+										<?php echo $this->load->view('edit/loans', '', TRUE);?>
+									</div>
 									<div class="tab-pane" id="account">
-										<?php echo $this->load->view('edit/account', '', TRUE);?>
+										<?php echo $this->load->view('edit/savings', '', TRUE);?>
 									</div>
 									<div class="tab-pane" id="history">
 										<?php echo $this->load->view('edit/history', '', TRUE);?>

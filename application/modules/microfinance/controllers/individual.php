@@ -32,7 +32,7 @@ class Individual extends microfinance
 	*	Default action is to show all the individual
 	*
 	*/
-	public function index($order = 'individual_onames', $order_method = 'ASC') 
+	public function index($order = 'individual_lname', $order_method = 'ASC') 
 	{
 		$where = 'individual_id > 0';
 		$table = 'individual';
@@ -218,6 +218,7 @@ class Individual extends microfinance
 		$v_data['titles'] = $this->individual_model->get_title();
 		$v_data['genders'] = $this->individual_model->get_gender();
 		$v_data['job_titles_query'] = $this->individual_model->get_job_titles();
+		$v_data['savings_payments'] = $this->individual_model->get_savings_payments($individual_id);
 		$v_data['emergency_contacts'] = $this->individual_model->get_emergency_contacts($individual_id);
 		$v_data['dependants'] = $this->individual_model->get_individual_dependants($individual_id);
 		$v_data['jobs'] = $this->individual_model->get_individual_jobs($individual_id);

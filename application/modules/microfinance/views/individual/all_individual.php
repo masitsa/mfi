@@ -13,9 +13,10 @@
 				<thead>
 					<tr>
 						<th>#</th>
-						<th><a href="'.site_url().'microfinance/individual/individual_onames/'.$order_method.'/'.$page.'">Other names</a></th>
+						<th><a href="'.site_url().'microfinance/individual/individual_number/'.$order_method.'/'.$page.'">Member number</a></th>
+						<th><a href="'.site_url().'microfinance/individual/individual_lname/'.$order_method.'/'.$page.'">Last name</a></th>
 						<th><a href="'.site_url().'microfinance/individual/individual_fname/'.$order_method.'/'.$page.'">First name</a></th>
-						<th><a href="'.site_url().'microfinance/individual/individual_username/'.$order_method.'/'.$page.'">Username</a></th>
+						<th><a href="'.site_url().'microfinance/individual/individual_mname/'.$order_method.'/'.$page.'">Middle name</a></th>
 						<th><a href="'.site_url().'microfinance/individual/individual_phone/'.$order_method.'/'.$page.'">Phone</a></th>
 						<th><a href="'.site_url().'microfinance/individual/individual_status/'.$order_method.'/'.$page.'">Status</a></th>
 						<th colspan="3">Actions</th>
@@ -41,12 +42,14 @@
 			{
 				$individual_id = $row->individual_id;
 				$individual_fname = $row->individual_fname;
-				$individual_onames = $row->individual_onames;
+				$individual_mname = $row->individual_mname;
+				$individual_lname = $row->individual_lname;
 				$individual_username = $row->individual_username;
 				$individual_phone = $row->individual_phone;
 				$individual_email = $row->individual_email;
 				$individual_status = $row->individual_status;
-				$individual_name = $individual_fname.' '.$individual_onames;
+				$individual_number = $row->individual_number;
+				$individual_name = $individual_fname.' '.$individual_lname;
 				
 				//status
 				if($individual_status == 1)
@@ -61,7 +64,7 @@
 				//create deactivated status display
 				if($individual_status == 0)
 				{
-					$status = '<span class="label label-important">Deactivated</span>';
+					$status = '<span class="label label-default">Deactivated</span>';
 					$button = '<a class="btn btn-info" href="'.site_url().'microfinance/activate-individual/'.$individual_id.'" onclick="return confirm(\'Do you want to activate '.$individual_name.'?\');" title="Activate '.$individual_name.'"><i class="fa fa-thumbs-up"></i></a>';
 				}
 				//create activated status display
@@ -76,9 +79,10 @@
 				'
 					<tr>
 						<td>'.$count.'</td>
-						<td>'.$individual_onames.'</td>
+						<td>'.$individual_number.'</td>
+						<td>'.$individual_lname.'</td>
 						<td>'.$individual_fname.'</td>
-						<td>'.$individual_username.'</td>
+						<td>'.$individual_mname.'</td>
 						<td>'.$individual_phone.'</td>
 						<td>'.$status.'</td>
 						<td><a href="'.site_url().'microfinance/edit-individual/'.$individual_id.'" class="btn btn-sm btn-success" title="Edit '.$individual_name.'"><i class="fa fa-pencil"></i></a></td>
@@ -100,8 +104,7 @@
 			$result .= "There are no individuals";
 		}
 ?>
-
-						<individual class="panel">
+						<section class="panel">
 							<header class="panel-heading">						
 								<h2 class="panel-title"><?php echo $title;?></h2>
 							</header>
@@ -140,4 +143,4 @@
                             <div class="panel-footer">
                             	<?php if(isset($links)){echo $links;}?>
                             </div>
-						</individual>
+						</section>

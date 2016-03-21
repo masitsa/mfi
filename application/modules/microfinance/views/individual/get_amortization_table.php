@@ -19,24 +19,27 @@ if($loan_amount > 0)
 	$cummulative_interest = 0;
 	$cummulative_principal = 0;
 	$start_balance = $loan_amount;
+	$total_days = 0;
 	
 	//display all payment dates
 	for($r = 0; $r < $no_of_repayments; $r++)
 	{
-		$total_days = $installment_type_duration * $r;
+		$total_days += $installment_type_duration;
 		$count = $r+1;
 		$payment_date = date('jS M Y', strtotime($first_date. ' + '.$total_days.' days'));
 		
 		//straight line
 		if($interest_id == 1)
 		{
-			$interest_payment = ($loan_amount * ($interest_rate/100)) / $no_of_repayments;
+			//$interest_payment = ($loan_amount * ($interest_rate/100)) / $no_of_repayments;
+			$interest_payment = ($loan_amount * ($interest_rate/100));
 		}
 		
 		//reducing balance
 		else
 		{
-			$interest_payment = ($start_balance * ($interest_rate/100)) / $no_of_repayments;
+			//$interest_payment = ($start_balance * ($interest_rate/100)) / $no_of_repayments;
+			$interest_payment = ($start_balance * ($interest_rate/100));
 		}
 		$principal_payment = $loan_amount / $no_of_repayments;
 		$end_balance = $start_balance - $principal_payment;
